@@ -1,0 +1,42 @@
+Innskuddsrente fra 1820 til 1999: http://www.norges-bank.no/globalassets/upload/import/publikasjoner/penger_og_kreditt/2000-04/holter.pdf
+
+Renter 2000-2012: https://www.ssb.no/a/aarbok/tab/tab-454.html
+
+Renter 2012-2017: https://www.finansportalen.no/bank/banksparing-historikk
+
+S&P 500 Historikk: http://www.econ.yale.edu/~shiller/data.htm
+
+http://www.simplestockinvesting.com/SP500-historical-real-total-returns.htm
+
+http://www.efficientfrontier.com/ef/997/dca.htm
+
+---
+
+Question: What is the optimal length to spread initial investment in the stock market?
+
+Given a minimum of say 4 years in market, how does every time period the last 100 years look with the following strategies:
+
+Lump-sum: Everything invested day 1.
+DCA3: Everything invested over 3 months.
+DCA6,DCA12, DCA18, DCA24, DCA36
+
+Start testing the first strategy for all time-periods. Save the result in an array:
+lumpsum[2012-02-01] = 3%
+With the start date as the index, and total return as the value.
+
+Draw a histogram with buckets with the extent to the array values. Bottom axis
+is return for the 4 year period and is logaritmic.
+
+Histogram: https://bl.ocks.org/mbostock/3885304 og https://nxsheet.com/sheets/56e845da4030182e337c6c2b
+
+
+----
+
+Viz2: http://bl.ocks.org/ianyfchang/8119685
+
+Vertikalt:
+Startperiode
+
+Horisontant:
+Total avkastning fra start første 60 måneder
+

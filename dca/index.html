@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Investment simulations</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+    <style>
+      .starter-template {
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+
+      /* disable text selection */
+      svg *::selection {
+         background : transparent;
+      }
+
+      svg *::-moz-selection {
+         background:transparent;
+      }
+
+      svg *::-webkit-selection {
+         background:transparent;
+      }
+      rect.selection {
+        stroke          : #333;
+        stroke-dasharray: 4px;
+        stroke-opacity  : 0.5;
+        fill            : transparent;
+      }
+
+      rect.cell-border {
+        stroke: #eee;
+        stroke-width:0.3px;
+      }
+
+      rect.cell-selected {
+        stroke: rgb(51,102,153);
+        stroke-width:0.5px;
+      }
+
+      rect.cell-hover {
+        stroke: #F00;
+        stroke-width:0.3px;
+      }
+
+      text.mono {
+        font-size: 9pt;
+        font-family: Consolas, courier;
+        fill: #aaa;
+      }
+
+      text.text-selected {
+        fill: #000;
+      }
+
+      text.text-highlight {
+        fill: #c00;
+      }
+      text.text-hover {
+        fill: #00C;
+      }
+      #tooltip {
+        position: absolute;
+        width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+
+      #tooltip.hidden {
+        display: none;
+      }
+
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 12px;
+        line-height: 20px;
+      }
+      /* Make the chart container fill the page using CSS. */
+      #chart {
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+      }
+
+      .loader {
+          border: 3px solid #f3f3f3; /* Light grey */
+          border-top: 3px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <main role="main" class="container">
+
+      <div class="starter-template">
+        <h1 class="display-4">Initial investment strategy simulations</h1>
+
+        <p class="lead">Simulate cumulative returns for an initial investment over the following X months given
+        historic S&P500 performance. Data is from Robert Shiller: <a href="http://www.econ.yale.edu/~shiller/data.htm">http://www.econ.yale.edu/~shiller/data.htm</a></p>
+
+          <form>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="simulationLength">Simulation length, months</label>
+              <input type="number" class="form-control" id="simulationLength" value="60">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="initialInvestment">Initial investment</label>
+              <input type="number" class="form-control" id="initialInvestment" value="100">
+            </div>
+            <div class="form-group col-md-3">
+              <label for="cellSize">Cell size</label>
+              <input type="number" class="form-control" id="cellSize" value="12">
+            </div>
+
+            <div class="form-group col-md-1">
+              <br>
+              <div class="loader"></div>
+            </div>
+
+
+          </div>
+
+          <button type="button" class="btn btn-outline-primary btn btn-block" onclick="drawHeatMap()">Redraw heatmap</button>
+        </form>
+
+      </div>
+
+      <div id="tooltip" class="hidden">
+        <p><span id="value"></p>
+      </div>
+
+      <script src="d3.v4.js"></script>
+      <div id="chart" style="overflow:auto;"></div>
+
+    </main><!-- /.container -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+    colors = [
+    '#91003F',
+    '#9B1A53',
+    '#A63467',
+    '#B14F7C',
+    '#BB6990',
+    '#C684A4',
+    '#D19EB9',
+    '#DBB9CD',
+    '#E6D3E1',
+    '#F1EEF6',
+    '#FFFFFF',
+    '#EDF8FB',
+    '#D2E6E3',
+    '#B8D4CB',
+    '#9EC2B3',
+    '#83B09B',
+    '#699F83',
+    '#4F8D6B',
+    '#347B53',
+    '#1A693B',
+    '#005824']
+
+    var margin = { top: 40, right: 10, bottom: 20, left: 70 }
+
+    function drawHeatMap(){
+
+      $(".loader").show();
+
+      d3.select("#chart").selectAll("*").remove()
+
+      // S&P500 Historic.tsv
+      d3.tsv("S&P500 Historic.tsv", function(data) {
+
+        // How many months ahead should we simulate for? 5 years = 60 months
+        // simulation_months = 60
+        simulation_months = +document.getElementById("simulationLength").value
+        // initial_investment = 100
+        initial_investment = +document.getElementById("initialInvestment").value
+        // cellSize = 12
+        cellSize = +document.getElementById("cellSize").value
+
+        width = cellSize * simulation_months
+        legendElementWidth = cellSize * 2.5
+
+        var rows = data.map(function(x) {
+           return x.Period
+        })
+
+        height = cellSize * rows.length
+
+        var simulations = []
+
+        data.map(function(d,i) {
+          var simulation_period = 0
+          var investment_value = initial_investment
+          var sim_results = []
+
+          // console.log('Simulating with start period ' + d.Period)
+
+          while(simulation_period < simulation_months){
+            simulation_period += 1
+
+            if(data[i + simulation_period] != null){
+              // console.log('Month ' + simulation_period + ' Pre-month investment value: ' + investment_value + ' Returns this month: ' + data[i + simulation_period].Change)
+              investment_value += investment_value * data[i + simulation_period].Change
+              cumulative_return = ( ( investment_value / initial_investment) - 1 ) * 100
+              // console.log('Cumulative return: ' + cumulative_return[simulation_period] + ' New investment value: ' + investment_value)
+
+              simulations.push({
+                start_period: d.Period,
+                month: simulation_period,
+                investment_value: investment_value,
+                cumulative_return: cumulative_return
+              })
+            }
+          }
+        });
+
+        //console.log(data[0])
+        //console.log(simulations)
+
+        var min = d3.min(simulations, function(d){
+          return d.cumulative_return
+        })
+
+        var max = d3.max(simulations, function(d){
+          return d.cumulative_return
+        })
+
+        console.log('Max profit: ' + max + ' Max drawdown: ' + min)
+
+        var colorScale = d3.scaleQuantile()
+            .domain([ min, 0, max])
+            .range(colors)
+
+        var svg = d3.select("#chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+        var rowLabels = svg.append("g")
+            .selectAll(".rowLabelg")
+            .data(rows)
+            .enter()
+            .append("text")
+            .text(function (d) { return d; })
+            .attr("x", 0)
+            .attr("y", function (d, i) { return i * cellSize; })
+            .style("text-anchor", "end")
+            .attr("transform", "translate(-6," + cellSize / 1.5 + ")")
+            .attr("class", function (d,i) { return "rowLabel mono r"+i;} )
+            .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
+            .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
+
+        var cols = []
+        for (var i = 1; i <= simulation_months; i++) {
+           cols.push(i)
+        }
+
+        var colLabels = svg.append("g")
+            .selectAll(".colLabelg")
+            .data(cols)
+            .enter()
+            .append("text")
+            .text(function (d) { return d; })
+            .attr("x", 0)
+            .attr("y", function (d, i) { return i * cellSize; })
+            .style("text-anchor", "left")
+            .attr("transform", "translate("+cellSize/2 + ",-6) rotate (-90)")
+            .attr("class",  function (d,i) { return "colLabel mono c"+i;} )
+            .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
+            .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
+
+        var heatMap = svg.append("g").attr("class","g3")
+              .selectAll(".cellg")
+            .data(simulations)
+              .enter()
+              .append("rect")
+              .attr("x", function(d) {
+                return d.month * cellSize; })
+              .attr("y", function(d) {
+                return rows.indexOf(d.start_period) * cellSize; })
+              .attr("class", function(d){return "cell cell-border cr"+(d.row-1)+" cc"+(d.col-1);})
+              .attr("width", cellSize)
+              .attr("height", cellSize)
+              .style("fill", function(d) {
+                return colorScale(d.cumulative_return)
+              })
+
+              .on("mouseover", function(d){
+
+                 //highlight text
+                 d3.select(this).classed("cell-hover",true);
+                 d3.selectAll(".rowLabel").classed("text-highlight",function(r,ri){ return ri==(d.row-1);});
+                 d3.selectAll(".colLabel").classed("text-highlight",function(c,ci){ return ci==(d.col-1);});
+
+                 //Update the tooltip position and value
+                 d3.select("#tooltip")
+                   .style("left", (d3.event.pageX+10) + "px")
+                   .style("top", (d3.event.pageY-10) + "px")
+                   .select("#value")
+                   .text("Value: " + d.investment_value.toFixed(0) + " (" + d.cumulative_return.toFixed(2) + "%) after " + d.month + " months, by starting on " + d.start_period)
+                 //Show the tooltip
+                 d3.select("#tooltip").classed("hidden", false);
+              })
+              .on("mouseout", function(){
+                 d3.select(this).classed("cell-hover",false);
+                 d3.selectAll(".rowLabel").classed("text-highlight",false);
+                 d3.selectAll(".colLabel").classed("text-highlight",false);
+                 d3.select("#tooltip").classed("hidden", true);
+              })
+
+        var legend = svg.selectAll(".legend")
+            .data([-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10])
+            .enter().append("g")
+            .attr("class", "legend");
+
+        legend.append("rect")
+          .attr("x", function(d, i) { return legendElementWidth * i; })
+          .attr("y", height+(cellSize*2))
+          .attr("width", legendElementWidth)
+          .attr("height", cellSize)
+          .style("fill", function(d, i) { return colors[i]; });
+
+        legend.append("text")
+          .attr("class", "mono")
+          .text(function(d) { return d; })
+          .attr("width", legendElementWidth)
+          .attr("x", function(d, i) { return legendElementWidth * i; })
+          .attr("y", height + (cellSize*4));
+
+        $(".loader").hide();
+
+      });
+
+    }
+
+    drawHeatMap();
+
+    </script>
+
+  </body>
+</html>
