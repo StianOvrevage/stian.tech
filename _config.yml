@@ -29,7 +29,7 @@ author:
 
 # Build settings
 markdown: kramdown
-remote_theme: jekyll-theme-hydeout
+remote_theme: fongandrew/hydeout # jekyll-theme-hydeout
 plugins:
   - jekyll-feed
 
