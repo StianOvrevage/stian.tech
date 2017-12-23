@@ -1,0 +1,228 @@
+[
+  {
+    "id": "regjering",
+    "name": "Regjering",
+    "sum": 404600000,
+    "driftsutgifter": 404600000,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 0,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "hoyesterett",
+    "name": "Høyesterett",
+    "sum": 108747000,
+    "driftsutgifter": 108747000,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 0,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "utenriksdept",
+    "name": "Utenriksdepartementet",
+    "sum": 36911096000,
+    "driftsutgifter": 8105666000,
+    "nybygg_osv": 79378000,
+    "overforinger_til_andre": 27410692000,
+    "utlan_gjeldsavdrag": 1315360000
+  },
+  {
+    "id": "kunnskapsdept",
+    "name": "Kunnskapsdepartementet",
+    "sum": 57978610000,
+    "driftsutgifter": 5267701000,
+    "nybygg_osv": 28049000,
+    "overforinger_til_andre": 52682860000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "kulturdept",
+    "name": "Kulturdepartementet",
+    "sum": 13524368000,
+    "driftsutgifter": 1952463000,
+    "nybygg_osv": 31490000,
+    "overforinger_til_andre": 11540415000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "justisdept",
+    "name": "Justis- og beredskapsdepartementet",
+    "sum": 60799835000,
+    "driftsutgifter": 36436316000,
+    "nybygg_osv": 2719272000,
+    "overforinger_til_andre": 21644247000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "kommunaldept",
+    "name": "Kommunal- og moderniseringsdepartementet",
+    "sum": 187536416000,
+    "driftsutgifter": 5517679000,
+    "nybygg_osv": 2824054000,
+    "overforinger_til_andre": 179194683000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "arbeidsdept",
+    "name": "Arbeids- og sosialdepartementet",
+    "sum": 36774858000,
+    "driftsutgifter": 19052148000,
+    "nybygg_osv": 665130000,
+    "overforinger_til_andre": 12557580000,
+    "utlan_gjeldsavdrag": 4500000000
+  },
+  {
+    "id": "helsedept",
+    "name": "Helse- og omsorgsdepartementet",
+    "sum": 158384010000,
+    "driftsutgifter": 5216018000,
+    "nybygg_osv": 25961000,
+    "overforinger_til_andre": 153142031000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "kongelige_hus",
+    "name": "Det kongelige hus",
+    "sum": 248169000,
+    "driftsutgifter": 21009000,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 227160000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "barnedept",
+    "name": "Barne- og likestillingsdepartementet",
+    "sum": 28311718000,
+    "driftsutgifter": 8771022000,
+    "nybygg_osv": 7639000,
+    "overforinger_til_andre": 19533057000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "naeringsdept",
+    "name": "Nærings- og fiskeridepartementet",
+    "sum": 11802229000,
+    "driftsutgifter": 4161158000,
+    "nybygg_osv": 1274400000,
+    "overforinger_til_andre": 6122671000,
+    "utlan_gjeldsavdrag": 244000000
+  },
+  {
+    "id": "landbruksdept",
+    "name": "Landbruks- og matdepartementet",
+    "sum": 17994766000,
+    "driftsutgifter": 1776682000,
+    "nybygg_osv": 3992000,
+    "overforinger_til_andre": 16214092000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "storting",
+    "name": "Stortinget og underliggende institusjoner",
+    "sum": 2270700000,
+    "driftsutgifter": 1526700000,
+    "nybygg_osv": 514000000,
+    "overforinger_til_andre": 230000000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "samferdselsdept",
+    "name": "Samferdselsdepartementet",
+    "sum": 66830100000,
+    "driftsutgifter": 15268700000,
+    "nybygg_osv": 17112100000,
+    "overforinger_til_andre": 34449300000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "miljodept",
+    "name": "Klima- og miljødepartementet",
+    "sum": 9622252000,
+    "driftsutgifter": 2773450000,
+    "nybygg_osv": 596108000,
+    "overforinger_til_andre": 6252694000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "finansdept",
+    "name": "Finansdepartementet",
+    "sum": 113972500000,
+    "driftsutgifter": 15502300000,
+    "nybygg_osv": 307300000,
+    "overforinger_til_andre": 34836100000,
+    "utlan_gjeldsavdrag": 63326800000
+  },
+  {
+    "id": "forsvarsdept",
+    "name": "Forsvarsdepartementet",
+    "sum": 50948190000,
+    "driftsutgifter": 34807502000,
+    "nybygg_osv": 15475484000,
+    "overforinger_til_andre": 665204000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "olje_energi_dept",
+    "name": "Olje- og energidepartementet",
+    "sum": 13149959000,
+    "driftsutgifter": 1661059000,
+    "nybygg_osv": 17000000,
+    "overforinger_til_andre": 5039900000,
+    "utlan_gjeldsavdrag": 6432000000
+  },
+  {
+    "id": "ymse",
+    "name": "Ymse utgifter",
+    "sum": 4950000000,
+    "driftsutgifter": 4950000000,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 0,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "statsbankene",
+    "name": "Statsbankene",
+    "sum": 111469378000,
+    "driftsutgifter": 736567000,
+    "nybygg_osv": 68560000,
+    "overforinger_til_andre": 14345068000,
+    "utlan_gjeldsavdrag": 96319183000
+  },
+  {
+    "id": "statlig_petro",
+    "name": "Statlig petroleumsvirksomhet",
+    "sum": 25500000000,
+    "driftsutgifter": 0,
+    "nybygg_osv": 25500000000,
+    "overforinger_til_andre": 0,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "statens_forretningsdrift",
+    "name": "Statens forretningsdrift",
+    "sum": 3421250000,
+    "driftsutgifter": -245336000,
+    "nybygg_osv": 3666586000,
+    "overforinger_til_andre": 0,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "folketrygden",
+    "name": "Folketrygden",
+    "sum": 460309826000,
+    "driftsutgifter": 0,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 460309826000,
+    "utlan_gjeldsavdrag": 0
+  },
+  {
+    "id": "oljefondet",
+    "name": "Statens pensjonsfond utland",
+    "sum": 138271000000,
+    "driftsutgifter": 0,
+    "nybygg_osv": 0,
+    "overforinger_til_andre": 138271000000,
+    "utlan_gjeldsavdrag": 0
+  }
+
+]
