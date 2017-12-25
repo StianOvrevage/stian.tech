@@ -11,7 +11,7 @@ Install some stuff in the container and start the dev-server.
 apt-get update
 apt-get install -y ruby-dev make gcc zlib1g-dev libcurl3 git
 gem install bundler
-bundle exec jekyll _3.3.0_ new blog
+bundle exec jekyll _3.3.0_ new blog # Only for un-initialized blogs
 cd blog
 bundle install
 bundle update
