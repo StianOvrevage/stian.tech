@@ -1,5 +1,5 @@
 ## Setting up Jekyll locally on Windows
-
+ 
 Start with a basic Ubuntu docker image with the GH-page repo bind-mounted to /blog
 
 ```
