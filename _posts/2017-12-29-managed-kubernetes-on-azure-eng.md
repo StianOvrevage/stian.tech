@@ -2,7 +2,7 @@
 layout: post
 title:  "Managed Kubernetes on Microsoft Azure (English)"
 date:   2017-12-29 00:00:00 +0000
-categories: kubernetes, english
+categories:
 excerpt_separator: <!--more-->
 ---
 
