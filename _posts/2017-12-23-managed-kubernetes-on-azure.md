@@ -215,20 +215,20 @@ Lagre teksten som kommandoen spytter ut i en fil på en trygg plass. Den innehol
 <a id="InstallerKubectl"></a>
 ### Installer kubectl
 
-`kubectl` er klienten som gjør alle operasjoner mot ditt Kubernetes cluster. Azure CLI kan installere kubectl for deg:
+`kubectl` er klienten som gjør alle operasjoner mot ditt Kubernetes cluster. Azure CLI kan installere `kubectl` for deg:
 
 ```
 az aks install-cli
 ```
 
-Etter kubectl er installert behøver vi å få påloggingsinformasjon slik at kubectl kan kommunisere med Kubernetes clusteret.
+Etter `kubectl` er installert behøver vi å få påloggingsinformasjon slik at `kubectl` kan kommunisere med Kubernetes clusteret.
 
 ```
 az aks get-credentials --resource-group min_aks_rg --name mitt_cluster
 ```
-Påloggingsinformasjonen lagres i `C:\Users\Stian\.kube\config`. Hold disse filene hemmelig også.
+Påloggingsinformasjonen lagres i `C:\Users\Brukernavn\.kube\config`. Hold disse filene hemmelig også.
 
-> **Protip** Når en har flere ulike Kubernetes clusters kan en bytte hvilken kubectl skal snakke til med `kubectl config get-contexts` og `kubectl config set-context mitt_cluster`.
+> **Protip** Når en har flere ulike Kubernetes clusters kan en bytte hvilken `kubectl` skal snakke til med `kubectl config get-contexts` og `kubectl config set-context mitt_cluster`.
 
 <a id="InspiserCluster"></a>
 ### Inspiser cluster
@@ -298,7 +298,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:1.7.9
+        image: nginx:mainline-alpine
         ports:
         - containerPort: 80
 ```
