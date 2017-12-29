@@ -60,7 +60,7 @@ Here is a incomplete and rough comparison between a Docker container and a virtu
 
 |                     | Virtual machine            | Docker container              |
 | ------------------- | --------------             | --------------------          |
-| Image size          | from 200MB to many GB      | fra 10MB til 3-400MB          |
+| Image size          | from 200MB to many GB      | from 10MB to 3-400MB          |
 | Startup time        | 60 seconds +               | 1-10 seconds                  |
 | Memory usage        | 256MB-512MB-1GB +          | 2MB +                         |
 | Security            | Good isolation between VMs | Not as good isolation between containers |
@@ -68,9 +68,9 @@ Here is a incomplete and rough comparison between a Docker container and a virtu
 
 > **PS** The numbers for virtual machines is taken from memory. I tried starting a MySQL virtual appliance on my laptop but VMware Player refuses to run because of Windows Hyper-V incompatibility. VMware Workstation refuses to run because of license issues and Oracle VirtualBox repeatedly gives me a nasty bluescreen. Hooray!
 
-> **Protip** The smallest and fastest Docker images are build on Alpine Linux. For the webserver Nginx the Alpine-based image is 15MB compared to 108MB for the normal Debian-based image. PostgreSQL:Alpine is 38MB compared to 287MB with "full" OS. Last version of MySQL is 343MB but will in version 8 support Alpine Linux as well.
+> **Protip** The smallest and fastest Docker images are built on Alpine Linux. For the webserver Nginx the Alpine-based image is 15MB compared to 108MB for the normal Debian-based image. PostgreSQL:Alpine is 38MB compared to 287MB with "full" OS. Last version of MySQL is 343MB but will in version 8 support Alpine Linux as well.
 
-So, some of the advantages of Docker containers are:
+To recap, some of the advantages of Docker containers are:
  - Compatibility across platforms, Linux, Windows, MacOS.
  - 10-100x smaller size. Faster to download, build and upload.
  - Memory usage only for application and not base OS.
@@ -80,7 +80,7 @@ So, some of the advantages of Docker containers are:
 
 [Download Docker for Windows here.][27]
 
-And start a MySQL database from Windows CMD or Powershell:
+To start a MySQL database container from Windows CMD or Powershell:
 
 ```
 docker run --name mysql -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=true mysql
@@ -165,7 +165,7 @@ Log on to Azure:
 ```
 az login
 ```
-You will get a link to open in your browser together with an authentication code. Enter the code on the webpage and `as login` will save the login information so that you will not have to authenticate again on the same machine.
+You will get a link to open in your browser together with an authentication code. Enter the code on the webpage and `az login` will save the login information so that you will not have to authenticate again on the same machine.
 
 > **PS** The login information gets saved in `C:\Users\Username\.azure\`. You have to make sure nobody can access these files. They will then have full access to your Azure account.
 
