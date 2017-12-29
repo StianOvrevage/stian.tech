@@ -6,6 +6,8 @@ categories:
 excerpt_separator: <!--more-->
 ---
 
+_Update 29. Dec: There is an [English version of this post here.][33]_
+
 Kubernetes (K8s) er i ferd med å bli de-facto standard for deployments av kontainer-baserte applikasjoner. Microsoft har nå preview av deres managed Kubernetes tjeneste (Azure Kubernetes Service, AKS) som gjør det enkelt å opprette et Kubernetes cluster og rulle ut tjenester uten å måtte ha kompetanse og tid til den daglige driften av selve Kubernetes-clusteret, som per i dag kan være relativt komplisert og tidkrevende.
 
 I denne posten setter vi opp et Kubernetes cluster fra scratch ved bruk av Azure CLI.
@@ -503,6 +505,7 @@ Kubernetes har også et veldig aktivt Slack-miljø på [kubernetes.slack.com][30
 [30]: http://slack.k8s.io/
 [31]: https://hub.docker.com/r/_/nginx/
 [32]: http://127.0.0.1:8001/ui/
+[33]: /2017/12/29/managed-kubernetes-on-azure-eng.html
 
 [minecraft]: /assets/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
 [k8s-dash]: /assets/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"

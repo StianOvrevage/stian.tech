@@ -498,7 +498,7 @@ Kubernetes also have a very active Slack-community on [kubernetes.slack.com][30]
 [30]: http://slack.k8s.io/
 [31]: https://hub.docker.com/r/_/nginx/
 [32]: http://127.0.0.1:8001/ui/
-[33]: http://stian.tech/2017/12/25/managed-kubernetes-on-azure.html
+[33]: /2017/12/25/managed-kubernetes-on-azure.html
 
 [minecraft]: /assets/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
 [k8s-dash]: /assets/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"
