@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Managed Kubernetes på Microsoft Azure"
+title:  "Managed Kubernetes på Microsoft Azure (Norwegian)"
 date:   2017-12-25 00:00:00 +0000
 categories:
 excerpt_separator: <!--more-->
