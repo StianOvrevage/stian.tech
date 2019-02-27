@@ -129,7 +129,7 @@ The fields we will be changing for the various tests are `direct`, `readwrite`, 
 
 I run the first tests on the OS disk of a Kubernetes node. The OS disks have Azure caching enabled.
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-os-disk-30gb-readwrite-cache,1thread,1k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-os-disk-30gb-readwrite-cache,1thread,1k-bs,1cpu.png "graph")
 
 > OS disk 30GB. Azure read + write cache. 1KB block size.
 
@@ -142,56 +142,56 @@ I'm not sure what to make of this. It's not acceptable that a Kubernetes node be
 <a id="Test2"></a>
 ## Test 2 - Sequential write, direct/sync, 4KB block size, IO depth 1
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,4k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,4k-bs,1cpu.png "graph")
 
 > By disabling the OS cache (`direct=1`) the results are consistent and predictable. There is no `iowait` since the application does not have multiple writes pending at the same time. We are limited by the 125 IOPS limit on the disk and since we use `direct` the OS cannot merge multiple 4KB writes together even though the writes are sequential. This gives us a maximum of 0.5MB/s bandwidth.
 
 <a id="Test3"></a>
 ## Test 3 - Sequential write, direct/sync, 4KB block size, IO depth 16
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,depth16,4k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,depth16,4k-bs,1cpu.png "graph")
 
 > For this test we only increase the IO depth from 1 to 16. IO depth is the number of write operations `fio` will execute simultaneously. Since we are using `direct` these will be queued by the OS for writing. This increases the write latency as well by a factor of 16 and we can get a feeling of the write queue by watching `Write time sdc` in the `Disk IO` panel. The `Node disk IO time` shows a consistent `1`, which means the disk is fully utilizied the whole time.
 
 <a id="Test4"></a>
 ## Test 4 - Sequential write, direct/sync, 128KB block size
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,128k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,128k-bs,1cpu.png "graph")
 
 > We increase the block size to 128KB. We are still limited by 125 IOPS but by increasing the block size we are now getting over 15MB/s bandwidth.
 
 <a id="Test5"></a>
 ## Test 5 - Sequential write, direct/sync, 256KB block size
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,256k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,256k-bs,1cpu.png "graph")
 
 > We increase the block size to 256KB. This crosses the threshold where we go from being limited by IOPS to limited by bandwidth. With 100 IOPS of 256KB blocks we hit the ceiling of 25MB/s.
 
 <a id="Test6"></a>
 ## Test 6 - Sequential write, buffered, 256KB block size
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,buffered,1thread,256k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,buffered,1thread,256k-bs,1cpu.png "graph")
 
 > We have now enabled the OS cache/buffer (`direct=0`). We can see that the writes hitting the disk are now merged to 512KB blocks and reducing the IOPS needed to hit the limit of 25MB/s to 50. Enabling the cache also has other effects: CPU suddenly shows significant IO wait. The write latency shoots through the roof. Also note that the writing continued for 3 minutes after I stopped the test at 20:42! **This also means that the bandwidth and IOPS that `fio` sees and reports is higher than what is actually hitting the disk.**
 
 <a id="Test7"></a>
 ## Test 7 - Random write, buffered, 256KB block size
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,256k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,256k-bs,1cpu.png "graph")
 
 > Here we go from sequential writes to random writes. We are limited by bandwidth. The average size of the blocks actually written to disks, and the IOPS required to hit the bandwidth limit is actually varying a bit throughout the test.
 
 <a id="Test8"></a>
 ## Test 8 - Random write, buffered, 256KB block size, IO depth 16
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,256k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,256k-bs,1cpu.png "graph")
 
 > Changing the queue length from 1 to 16 does not make any difference. This is because the OS is accepting all the writes from `fio` and caching them before writing them to disk.
 
 <a id="Test9"></a>
 ## Test 9 - Random write, buffered, 4KB block size, IO depth 16
 
-![](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,4k-bs,1cpu.png "")
+![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,4k-bs,1cpu.png "graph")
 
 > For the final test we reduce the block size to 4KB. Which would be a worst case scenario of random small writes all over the disk. We are now limited by 125 IOPS and the bandwidt is about 0.5-1MB/s. Because of the OS cache `fio` was able to create a lot of data and a 3 minute `fio` job took over **60 minutes** to be written to disk!
 
