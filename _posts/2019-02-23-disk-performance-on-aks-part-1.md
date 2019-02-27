@@ -200,3 +200,31 @@ I'm not sure what to make of this. It's not acceptable that a Kubernetes node be
 
 Access patterns and block sizes have a tremendous impact on the amount of data we are able to write to disk. We also saw in the last test that generating more data than the underlying storage can receive is not sustainable over time.
 
+#########
+
+
+https://grafana.com/dashboards/9852
+
+
+kubectl label nodes aks-nodepool1-37707184-2 tag=disktest
+
+> not used: kubectl run disk-test2 -i --tty --image ubuntu:19.04 --overrides='{ "apiVersion": "apps/v1beta1", "spec": { "template": { "spec": { "nodeSelector": { "tag": "disktest" } } } } }' -- bash
+
+k apply -f assets/2019-02-23-disk-performance-on-aks-part-1.md/ubuntu-statefulset.yaml
+
+k exec -it disk-test-0 bash
+
+apt-get update && apt-get install -y fio
+
+fio --section=test1 jobs.fio
+fio --section=test2 jobs.fio
+fio --section=test3 jobs.fio
+fio --section=test4 jobs.fio
+fio --section=test5 jobs.fio
+fio --section=test6 jobs.fio
+fio --section=test7 jobs.fio
+fio --section=test8 jobs.fio
+fio --section=test9 jobs.fio
+fio --section=test10 jobs.fio
+
+
