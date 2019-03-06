@@ -179,9 +179,11 @@ When the Pod is `Running` we can start a shell on it with `kubectl exec -it disk
 
 Once inside `bash` on the Pod, we install `fio`:
 
-    apt-get update && apt-get install -y fio
+    apt-get update && apt-get install -y fio wget
 
-And save the contents of https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/jobs.fio somewhere in the Pod.
+And save the contents of in the Pod:
+
+    wget https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/jobs.fio
 
 Now we can run the different test sections one by one. **PS: If you don't specify a section `fio` will run all the tests _simultaneously_, which is not what we want.**
 
