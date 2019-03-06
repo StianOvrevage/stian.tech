@@ -1,4 +1,4 @@
-root@disk-test-0:/# fio --section=test8 jobs.fio
+root@disk-test-0:/# fio --section=test7 jobs.fio
 test8: (g=0): rw=randwrite, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=1
 fio-3.12
 Starting 1 thread
