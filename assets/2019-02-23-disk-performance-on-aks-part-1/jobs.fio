@@ -43,7 +43,7 @@ blocksize=128k
 
 [test6]
 filename=/data/fio-test-file
-direct=1
+direct=0
 readwrite=write
 iodepth=1
 blocksize=256k
@@ -51,25 +51,18 @@ blocksize=256k
 [test7]
 filename=/data/fio-test-file
 direct=0
-readwrite=write
-iodepth=1
-blocksize=256k
-
-[test8]
-filename=/data/fio-test-file
-direct=0
 readwrite=randwrite
 iodepth=1
 blocksize=4k
 
-[test9]
+[test8]
 filename=/data/fio-test-file
 direct=0
 readwrite=randwrite
 iodepth=16
 blocksize=256k
 
-[test10]
+[test9]
 filename=/data/fio-test-file
 direct=0
 readwrite=randwrite

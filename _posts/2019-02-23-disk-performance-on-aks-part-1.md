@@ -1,30 +1,40 @@
 ---
 layout: post
-title:  "Disk performance on Azure Kubernetes Service (AKS) - Part 1: Benchmarking"
-date:   2019-02-23 00:00:00 +0000
+title: "Disk performance on Azure Kubernetes Service (AKS) - Part 1: Benchmarking"
+date: 2019-02-23 00:00:00 +0000
 categories:
 excerpt_separator: <!--more-->
 ---
 
-DRAFT
+Understanding the characteristics of disk performance of a platform might be more important than you think. If disk resources are not correctly matched to your workload, your performance will suffer and might lead you to incorrectly diagnose a problem as being related to CPU or memory.
+
+The defaults might also not give you the performance you expect.
+
+In this first post on troubleshooting some disk performance issues on Azure Kubernetes Service (AKS) we will benchmark Azure Premium SSD to find how workloads affect performance and which metrics to monitor to know when troubleshooting potential disk issues.
 
 <!--more-->
+
+TLDR:
+ - Disable Azure cache for workloads with high number of random writes
+ - Use a P15 (256GB) or larger Premium SSD even though you might only need a fraction of it.
 
 Table of contents
 
   - [Background](#Background)
     - [Metric Methodologies](#MetricsMethodologies)
-  - [Storage Background](#StorageBackground)
+    - [Storage Background](#StorageBackground)
   - [What to measure?](#WhatToMeasure)
-  - [Test 1 - Learning to dislike Azure Cache](#Test1)
-  - [Test 2 - Sequential write, direct/sync, 4KB block size, IO depth 1](#Test2)
-  - [Test 3 - Sequential write, direct/sync, 4KB block size, IO depth 16](#Test3)
-  - [Test 4 - Sequential write, direct/sync, 128KB block size](#Test4)
-  - [Test 5 - Sequential write, direct/sync, 256KB block size](#Test5)
-  - [Test 6 - Sequential write, buffered, 256KB block size](#Test6)
-  - [Test 7 - Random write, buffered, 256KB block size](#Test7)
-  - [Test 8 - Random write, buffered, 256KB block size, IO depth 16](#Test8)
-  - [Test 9 - Random write, buffered, 4KB block size, IO depth 16](#Test9)
+  - [How to measure disk](#HowToMeasureDisk)
+  - [How to measure disk on Azure Kubernetes Service](HowToMeasureDiskOnAKS)
+  - [Test results](#Tests)
+    - [Test 1 - Learning to dislike Azure Cache](#Test1)
+    - [Test 2 - Disable Azure Cache - enable OS cache](#Test2)
+    - [Test 3 - Disable OS cache](#Test3)
+    - [Test 4 - Increase IO depth](#Test4)
+    - [Test 5 - Larger block size, smaller IO depth](#Test5)
+    - [Test 6 - Enable OS cache](#Test6)
+    - [Test 7 - Random writes, small block size](#Test7)
+    - [Test 8 - Large block size](#Test8)
   - [Conclusion](#Conclusion)
 
 #### Microsoft Azure
@@ -62,19 +72,19 @@ I'll be using the USE method here. USE can be summarised as:
     * **errors**: the count of error events
 
 <a id="StorageBackground"></a>
-## Storage Background
+### Storage Background
 
 Disk usage has two dimensions, throughput/bandwidth(BW) and operations per second (IOPS), and the underlying storage system will have upper limits of how much data it can receive (BW) and the number of operations it can perform per second (IOPS).
 
-> Background - harddrive types: harddrives come in two types, Solid State Disks (SSD) and spindle (HDD). A SSD disk is a microship capable of permanently storing data while a HDD uses spinning platters to store data. HDDs have a fixed rate of rotation (RPM), typically 5.400 and 7.200 RPM for lower cost drives for home use and higher cost 10.000 and 15.000 RPM drives for server use. Over the last 20 years of HDDs their storage density has increased, but the RPM has largely stayed the same. A disk with twice the density (500GB to 1TB for example) can read twice as much data on a single rotation and thus increase the bandwidth significantly. However, reading or writing a random block still requires waiting for the disk to spin enough to reach the relevant sector on the disk. So IOPS has not increased much for HDDs and is still a low 125-150 IOPS for a 10.000 RPM enterprise disk. A SSD does not have any moving parts so is able to reach MUCH higher IOPS. A low end Samsung 960 EVO with 500GB capacity costs $150 and can achieve a whopping 330.000 IOPS! ([wikipedia.com](https://en.wikipedia.org/wiki/IOPS))
+> __Background - harddrive types__: harddrives come in two types, Solid State Disks (SSD) and spindle (HDD). A SSD disk is a microship capable of permanently storing data while a HDD uses spinning platters to store data. HDDs have a fixed rate of rotation (RPM), typically 5.400 and 7.200 RPM for lower cost drives for home use and higher cost 10.000 and 15.000 RPM drives for server use. Over the last 20 years of HDDs their storage density has increased, but the RPM has largely stayed the same. A disk with twice the density (500GB to 1TB for example) can read twice as much data on a single rotation and thus increase the bandwidth significantly. However, reading or writing a random block still requires waiting for the disk to spin enough to reach the relevant sector on the disk. So IOPS has not increased much for HDDs and is still a low 125-150 IOPS for a 10.000 RPM enterprise disk. A SSD does not have any moving parts so is able to reach MUCH higher IOPS. A low end Samsung 960 EVO with 500GB capacity costs $150 and can achieve a whopping 330.000 IOPS! ([wikipedia.com](https://en.wikipedia.org/wiki/IOPS))
 
-> Background - access patterns: The way a program uses storage also has a huge impact on the performance one can achieve. Sequential access is when we read or write a large file. When this happens the operating system and harddrive can optimize and "merge" operations so that we can read or write a much bigger chunk of data at a time. If we can read 1MB at a time 150 times per second we get 150MB/s of bandwidth. However, fully random access where the smallest chunk we read or write is a 4KB block the same 150 IOPS would only give a bandwidth of 0.6MB/s!
+> __Background - access patterns__: The way a program uses storage also has a huge impact on the performance one can achieve. Sequential access is when we read or write a large file. When this happens the operating system and harddrive can optimize and "merge" operations so that we can read or write a much bigger chunk of data at a time. If we can read 1MB at a time 150 times per second we get 150MB/s of bandwidth. However, fully random access where the smallest chunk we read or write is a 4KB block the same 150 IOPS would only give a bandwidth of 0.6MB/s!
 
-> Background - cloud vs physical: Now we know what HDDs are limited to a low IOPS and low IOPS combined with a random access pattern gives us a low overall bandwidth. There is a huge gotcha here when it comes to cloud. On Azure when using Premium Managed SSD the IOPS you are given is a factor of the disk size you provision ([microsoft.com](https://azure.microsoft.com/en-us/pricing/details/managed-disks/)). A 512GB disk is limited to 2.300 IOPS and 150MB/s. With 100% random access that only gives about 9MB/s of bandwidth!
+> __Background - cloud vs physical__: Now we know what HDDs are limited to a low IOPS and low IOPS combined with a random access pattern gives us a low overall bandwidth. There is a huge gotcha here when it comes to cloud. On Azure when using Premium Managed SSD the IOPS you are given is a factor of the disk size you provision ([microsoft.com](https://azure.microsoft.com/en-us/pricing/details/managed-disks/)). A 512GB disk is limited to 2.300 IOPS and 150MB/s. With 100% random access that only gives about 9MB/s of bandwidth!
 
-> Background - OS caching: To overcome some of the limitations of the underlying disk (mostly IOPS) there are potentially several layers of caching involved. Linux file systems can have `writeback` enabled which causes Linux to temporarily store data that is going to be written to disk in memory. This can give a big performance increase when there are sudden spikes of writes exceeding the performance of the underlying disk. It also increases the chance that operations can be `merged` where several write operations to areas of the disk that are nearby can be executed as one. This caching works best for sudden peaks and will not necessarily be enough if there is continous random writes to disk. This caching also means that even though an application thinks it has saved some data to disk it can be lost in the case of a power outage or other failure. Applications can also explicitly request `direct` access where every operation is persisted to disk before receiving a confirmation. This is a trade-off between performance and durability that needs to be decided based on the application itself and the environment.
+> __Background - OS caching__: To overcome some of the limitations of the underlying disk (mostly IOPS) there are potentially several layers of caching involved. Linux file systems can have `writeback` enabled which causes Linux to temporarily store data that is going to be written to disk in memory. This can give a big performance increase when there are sudden spikes of writes exceeding the performance of the underlying disk. It also increases the chance that operations can be `merged` where several write operations to areas of the disk that are nearby can be executed as one. This caching works best for sudden peaks and will not necessarily be enough if there is continous random writes to disk. This caching also means that even though an application thinks it has saved some data to disk it can be lost in the case of a power outage or other failure. Applications can also explicitly request `direct` access where every operation is persisted to disk before receiving a confirmation. This is a trade-off between performance and durability that needs to be decided based on the application itself and the environment.
 
-> Background - Azure caching: Azure also provides read and write cache for its `disks` which is enabled by default. As we will see soon for our use case it's not a good idea to use.
+> __Background - Azure caching__: Azure also provides read and write cache for its `disks` which is enabled by default. As we will see soon for our use case it's not a good idea to use.
 
 <a id="WhatToMeasure"></a>
 ## What to measure?
@@ -97,7 +107,8 @@ Useful calculated metrics:
  - `rate(node_disk_write_time_seconds_total) / rate(node_disk_writes_completed_total)` - Write latency. How long from a write is requested until it's completed.
  - `rate(node_disk_written_bytes_total) / rate(node_disk_writes_completed_total)` - Write size. How big the **average** write operation is. 4KB is minimum and indicates 100% random access while 512KB is maximum and indicates sequential access.
 
-## How to measure
+<a id="HowToMeasureDisk"></a>
+## How to measure disk
 
 The best tool for measuring disk performance is `fio`, even though it might seem a bit intimidating at first due to it's insane number of options.
 
@@ -124,107 +135,160 @@ Installing `fio` on Ubuntu:
 
 The fields we will be changing for the various tests are `direct`, `readwrite`, `iodepth` and `blocksize`. Save the contents in a file named `job.fio` and we run a test with `fio job.fio` and wait for a while. We don't necessarily wait until the tests finish but until we reach some steady state of performance as shown in Grafana.
 
+<a id="HowToMeasureDiskOnAKS"></a>
+## How to measure disk on Azure Kubernetes Service
+
+For this testing we use a standard Prometheus installation collecting data from `node-exporter` and visualizing data in Grafana. The dashboard I created for the testing can be found here: https://grafana.com/dashboards/9852.
+
+By default Kubernetes will schedule a Pod to any node that has enough memory and CPU for our workload. Since one of the tests we are going to run are on the OS disk we do not want the Pod to run on the same node as any other disk-intensive application, such as Prometheus.
+
+Look at which Pods are running with `kubectl get pods -o wide` and look for a node that does not have any disk-intensive application.
+
+Then we tag that node with `kubectl label nodes aks-nodepool1-37707184-2 tag=disktest`. This allows us later to specify that we want to run our testing Pod on that specific node.
+
+---
+
+A StorageClass in Kubernetes is a specification of a underlying disk that Pods can request usage of through `volumeClaimTemplates`. AKS comes with a default StorageClass `managed-premium` that has caching enabled. Most of these tests require the Azure cache disabled so create a new StorageClass `managed-premium-retain-nocache`:
+
+    kind: StorageClass
+    apiVersion: storage.k8s.io/v1
+    metadata:
+      name: managed-premium-retain-nocache
+    provisioner: kubernetes.io/azure-disk
+    reclaimPolicy: Retain
+    parameters:
+      storageaccounttype: Premium_LRS
+      kind: Managed
+      cachingmode: None
+
+You can add it to your cluster with:
+
+    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/storageclass.yaml
+
+---
+
+Next we create a StatefulSet that uses a `volumeClaimTemplate` to request a 250GB Azure disk. This provisions a P15 Azure Premium SSD with 125MB/s bandwidth and 1100 IOPS:
+
+    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/ubuntu-statefulset.yaml
+
+Follow the progress of the Pod creation with `kubectl get pods -w` and wait until it is `Running`.
+
+---
+
+When the Pod is `Running` we can start a shell on it with `kubectl exec -it disk-test-0 bash`
+
+Once inside `bash` on the Pod, we install `fio`:
+
+    apt-get update && apt-get install -y fio
+
+And save the contents of https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/jobs.fio somewhere in the Pod.
+
+Now we can run the different test sections one by one. **PS: If you don't specify a section `fio` will run all the tests _simultaneously_, which is not what we want.**
+
+    fio --section=test1 jobs.fio
+    fio --section=test2 jobs.fio
+    fio --section=test3 jobs.fio
+    fio --section=test4 jobs.fio
+    fio --section=test5 jobs.fio
+    fio --section=test6 jobs.fio
+    fio --section=test7 jobs.fio
+    fio --section=test8 jobs.fio
+    fio --section=test9 jobs.fio
+
+
+<a id="Tests"></a>
+## Test results
+
 <a id="Test1"></a>
-## Test 1 - Learning to dislike Azure Cache
+### Test 1 - Learning to dislike Azure Cache
+
+*Sequential write, 4K block size, Azure Cache enabled, OS cache disabled. See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
 I run the first tests on the OS disk of a Kubernetes node. The OS disks have Azure caching enabled.
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-os-disk-30gb-readwrite-cache,1thread,1k-bs,1cpu.png "graph")
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test1.png "graph")
 
-> OS disk 30GB. Azure read + write cache. 1KB block size.
+The first 1-2 minutes of the test I get very good performance of 45MB/s and ~11.500 IOPS but that drops to 0 very quickly as the cache is full and busy writing things to the underlying disk. When that happens everything freezes and I cannot even execute shell commands. After stopping the test the system still hangs for a bit while the cache empties.
 
-I run the test twice for a few minutes to see the results.
+The maximum latency measured by `fio` was 108751k usec. Or about 108 seconds!
 
-The first 20-30 seconds of the test I get very good performance of 250MB/s and 500 IOPS but that drops to 0 very quickly as the cache is full and writing things to the actual disk. When that happens everything freezes and I cannot even execute shell commands even. The 20-30 seconds of writing causes a 7-8 minutes hang while the cache empties. On the second run of the same test the spikes are smaller at 50MB/s and 100 IOPS and the hangs much shorter.
+> For the first try of these tests a 20-30 second period of very fast writes (250MB/s) caused a 7-8 minutes hang while the cache emptied. Trying again caused another pattern of lower peak performance with shorter hangs in between. Very unpredictable.
+> I'm not sure what to make of this. It's not acceptable that a Kubernetes node becomes unresponsive for many minutes following a short burst of writing. There are scattered recommendations online of disabling caching for write-heavy applications. Since I have not found any way to measure the Azure cache itself, the results are unpredictable and potentially very impactful as well as making it very hard to use the metrics we do have to evaluate application and storage behaviour I've concluded that it's best to use data disks with caching disabled for our workloads (you cannot disable caching on an AKS node OS disk).
 
-I'm not sure what to make of this. It's not acceptable that a Kubernetes node becomes unresponsive for many minutes following a short burst of writing. There are scattered recommendations online of disabling caching for write-heavy applications. Since I have not found any way to measure the Azure cache itself, the results are unpredictable and potentially very impactful as well as making it very hard to use the metrics we do have to evaluate application and storage behaviour I've concluded that it's best to use data disks with caching disabled for our workloads (you cannot disable caching on an AKS node OS disk).
 
 <a id="Test2"></a>
-## Test 2 - Sequential write, direct/sync, 4KB block size, IO depth 1
+### Test 2 - Disable Azure Cache - enable OS cache
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,4k-bs,1cpu.png "graph")
+*Sequential write, 4K block size. __Change: Azure cache disabled, OS caching enabled.__ See [full fio test results]*(/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
-> By disabling the OS cache (`direct=1`) the results are consistent and predictable. There is no `iowait` since the application does not have multiple writes pending at the same time. We are limited by the 125 IOPS limit on the disk and since we use `direct` the OS cannot merge multiple 4KB writes together even though the writes are sequential. This gives us a maximum of 0.5MB/s bandwidth.
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test2.png "graph")
+
+If we swap the Azure cache for the Linux OS cache we see that `iowait` increases while the writing occurs. The application sees high write performance until the number of `Dirty bytes` reaches a threshold of about 3.7GB of memory. The performance of the underlying disk is 125MB/s and 250 IOPS. Here we are throttled by the 125MB/s limit of the Azure P15 Premium SSD.
+
+Also notice that on sequential writes of 4K with OS caching the actual blocks written to disk is 512K which saves us a lot of IOPS. This will become important later.
 
 <a id="Test3"></a>
-## Test 3 - Sequential write, direct/sync, 4KB block size, IO depth 16
+### Test 3 - Disable OS cache
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,depth16,4k-bs,1cpu.png "graph")
+*Sequential write, 4K block size. __Change: OS caching disabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
-> For this test we only increase the IO depth from 1 to 16. IO depth is the number of write operations `fio` will execute simultaneously. Since we are using `direct` these will be queued by the OS for writing. This increases the write latency as well by a factor of 16 and we can get a feeling of the write queue by watching `Write time sdc` in the `Disk IO` panel. The `Node disk IO time` shows a consistent `1`, which means the disk is fully utilizied the whole time.
+
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test3.png "graph")
+
+> By disabling the OS cache (`direct=1`) the results are consistent and predictable. There is no `iowait` since the application does not have multiple writes pending at the same time. Because of the 2-3ms latency of the disks we are not able to get more than about 400 IOPS. This gives us a meager 1.5MB/s even though the disk is limited to 1100 IOPS and 125MB/s. To reach that we need multiple simultaneous writes or a bigger IO depth (queue). `Disk active time` is also 0% which indicates that the disk is not saturated.
 
 <a id="Test4"></a>
-## Test 4 - Sequential write, direct/sync, 128KB block size
+### Test 4 - Increase IO depth
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,128k-bs,1cpu.png "graph")
+*Sequential write, 4K block size, OS caching disabled. __Change: IO depth 16.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test4.md).*
 
-> We increase the block size to 128KB. We are still limited by 125 IOPS but by increasing the block size we are now getting over 15MB/s bandwidth.
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test4.png "graph")
+
+> For this test we only increase the IO depth from 1 to 16. IO depth is the number of write operations `fio` will execute simultaneously. Since we are using `direct` these will be queued by the OS for writing. We are now able to hit the performance limit of 1100 IOPS. `Disk active time` is now steady at 100% indicating that we have saturated the disk.
+
 
 <a id="Test5"></a>
-## Test 5 - Sequential write, direct/sync, 256KB block size
+### Test 5 - Larger block size, smaller IO depth
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,direct,1thread,256k-bs,1cpu.png "graph")
+*Sequential write, OS caching disabled. __Change: 128K block size, IO depth 1.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test5.md).*
 
-> We increase the block size to 256KB. This crosses the threshold where we go from being limited by IOPS to limited by bandwidth. With 100 IOPS of 256KB blocks we hit the ceiling of 25MB/s.
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test5.png "graph")
+
+> We increase the block size to 128KB and reduce the IO depth to 1 again. The write latency for larger blocks increase to ~5ms which gives us 200 IOPS and 28MB/s. The disk is not saturated.
+
 
 <a id="Test6"></a>
-## Test 6 - Sequential write, buffered, 256KB block size
+### Test 6 - Enable OS cache
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,write,buffered,1thread,256k-bs,1cpu.png "graph")
+*Sequential write, 256K block size, IO depth 1. __Change: OS caching enabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test6.md).*
 
-> We have now enabled the OS cache/buffer (`direct=0`). We can see that the writes hitting the disk are now merged to 512KB blocks and reducing the IOPS needed to hit the limit of 25MB/s to 50. Enabling the cache also has other effects: CPU suddenly shows significant IO wait. The write latency shoots through the roof. Also note that the writing continued for 3 minutes after I stopped the test at 20:42! **This also means that the bandwidth and IOPS that `fio` sees and reports is higher than what is actually hitting the disk.**
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test6.png "graph")
+
+> We have now enabled the OS cache/buffer (`direct=0`). We can see that the writes hitting the disk are now merged to 512KB blocks. We are hitting the 125MB/s limit with about 250 IOPS. Enabling the cache also has other effects: CPU suddenly shows significant IO wait. The write latency shoots through the roof. Also note that the writing continued for 30-40 seconds after the test was done. **This also means that the bandwidth and IOPS that `fio` sees and reports is higher than what is actually hitting the disk.**
+
 
 <a id="Test7"></a>
-## Test 7 - Random write, buffered, 256KB block size
+### Test 7 - Random writes, small block size
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,256k-bs,1cpu.png "graph")
+*IO depth 1, OS caching enabled. __Change: Random write, 4K block size.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
-> Here we go from sequential writes to random writes. We are limited by bandwidth. The average size of the blocks actually written to disks, and the IOPS required to hit the bandwidth limit is actually varying a bit throughout the test.
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test7.png "graph")
+
+> Here we go from sequential writes to random writes. We are limited by IOPS. The average size of the blocks actually written to disks, and the IOPS required to hit the bandwidth limit is actually varying a bit throughout the test. The time taken to empty the cache is about as long as I ran the test (4-5 minutes).
+
 
 <a id="Test8"></a>
-## Test 8 - Random write, buffered, 256KB block size, IO depth 16
+### Test 8 - Large block size
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,256k-bs,1cpu.png "graph")
+*Random write, OS caching enabled. __Change: 256K block size, IO depth 16.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test8.md).*
 
-> Changing the queue length from 1 to 16 does not make any difference. This is because the OS is accepting all the writes from `fio` and caching them before writing them to disk.
+![graph](../assets/2019-02-23-disk-performance-on-aks-part-1/test8.png "graph")
 
-<a id="Test9"></a>
-## Test 9 - Random write, buffered, 4KB block size, IO depth 16
-
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1.md/2019-02-22-data-disk-30gb-no-cache,random-write,-buffered,1thread,qlen16,4k-bs,1cpu.png "graph")
-
-> For the final test we reduce the block size to 4KB. Which would be a worst case scenario of random small writes all over the disk. We are now limited by 125 IOPS and the bandwidt is about 0.5-1MB/s. Because of the OS cache `fio` was able to create a lot of data and a 3 minute `fio` job took over **60 minutes** to be written to disk!
+> Increasing the block size to 256K makes us bandwidth limited to 125MB/s.
 
 <a id="Conclusion"></a>
 ## Conclusion
 
-Access patterns and block sizes have a tremendous impact on the amount of data we are able to write to disk. We also saw in the last test that generating more data than the underlying storage can receive is not sustainable over time.
-
-#########
-
-
-https://grafana.com/dashboards/9852
-
-
-kubectl label nodes aks-nodepool1-37707184-2 tag=disktest
-
-> not used: kubectl run disk-test2 -i --tty --image ubuntu:19.04 --overrides='{ "apiVersion": "apps/v1beta1", "spec": { "template": { "spec": { "nodeSelector": { "tag": "disktest" } } } } }' -- bash
-
-k apply -f assets/2019-02-23-disk-performance-on-aks-part-1.md/ubuntu-statefulset.yaml
-
-k exec -it disk-test-0 bash
-
-apt-get update && apt-get install -y fio
-
-fio --section=test1 jobs.fio
-fio --section=test2 jobs.fio
-fio --section=test3 jobs.fio
-fio --section=test4 jobs.fio
-fio --section=test5 jobs.fio
-fio --section=test6 jobs.fio
-fio --section=test7 jobs.fio
-fio --section=test8 jobs.fio
-fio --section=test9 jobs.fio
-fio --section=test10 jobs.fio
+Access patterns and block sizes have a tremendous impact on the amount of data we are able to write to disk.
 
 
