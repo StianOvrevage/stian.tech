@@ -89,7 +89,7 @@ Disk usage has two dimensions, throughput/bandwidth(BW) and operations per secon
 <a id="WhatToMeasure"></a>
 ## What to measure?
 
-> These metrics are collected by the Prometheus `node-exporter` and follows it's naming.
+> These metrics are collected by the Prometheus `node-exporter` and follows it's naming. I've also created a dashboard that is available on [Grafana.com](https://grafana.com/dashboards/9852).
 
 With the USE methodology as a guideline and the two separate but related "resources", bandwidth and IOPS we can look for some useful metrics.
 
@@ -116,29 +116,32 @@ Installing `fio` on Ubuntu:
 
     apt-get install fio
 
-`fio` executes `jobs` described in a file. Here is the file we start of with:
+`fio` executes `jobs` described in a file. Here is the top of our jobs file:
 
     [global]
     ioengine=libaio   # sync|libaio|mmap
-    direct=1          # If value is true, use non-buffered I/O. This is usually O_DIRECT
-    size=5g           # Size of test file
     group_reporting
     thread
-    filename=/data/fio-test-file
+    size=10g          # Size of test file
+    cpus_allowed=1    # Only use this CPU core
+    runtime=300s      # Run test for 5 minutes
 
     [test1]
-    loops=10
+    filename=/tmp/fio-test-file
+    direct=1          # If value is true, use non-buffered I/O. Non-buffered I/O usually means O_DIRECT
     readwrite=write   # read|write|randread|randwrite|readwrite|randrw
     iodepth=1         # How many operations to queue to the disk
     blocksize=4k
-    cpus_allowed=1    # Only use this CPU core
 
-The fields we will be changing for the various tests are `direct`, `readwrite`, `iodepth` and `blocksize`. Save the contents in a file named `job.fio` and we run a test with `fio job.fio` and wait for a while. We don't necessarily wait until the tests finish but until we reach some steady state of performance as shown in Grafana.
+The fields we will be changing for the various tests are `direct`, `readwrite`, `iodepth` and `blocksize`. Save the contents in a file named `jobs.fio` and we run a test with `fio --sector test1 jobs.fio` and wait until the test completes.
+
+> PS: To run these tests on higher performance hardware and better caching you might want to set `runtime` to `0` to have the test run continously and monitor the metrics until performance reaches a steady-state.
+
 
 <a id="HowToMeasureDiskOnAKS"></a>
 ## How to measure disk on Azure Kubernetes Service
 
-For this testing we use a standard Prometheus installation collecting data from `node-exporter` and visualizing data in Grafana. The dashboard I created for the testing can be found here: https://grafana.com/dashboards/9852.
+For this testing we use a standard Prometheus installation collecting data from `node-exporter` and visualizing data in Grafana. The dashboard I created for the testing can be found here: [https://grafana.com/dashboards/9852](https://grafana.com/dashboards/9852).
 
 By default Kubernetes will schedule a Pod to any node that has enough memory and CPU for our workload. Since one of the tests we are going to run are on the OS disk we do not want the Pod to run on the same node as any other disk-intensive application, such as Prometheus.
 
@@ -221,7 +224,7 @@ The maximum latency measured by `fio` was 108751k usec. Or about 108 seconds!
 <a id="Test2"></a>
 ### Test 2 - Disable Azure Cache - enable OS cache
 
-*Sequential write, 4K block size. __Change: Azure cache disabled, OS caching enabled.__ See [full fio test results]*(/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
+*Sequential write, 4K block size. __Change: Azure cache disabled, OS caching enabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
 ![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test2.png "graph")
 
