@@ -1,0 +1,76 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  labels:
+    app: countly-server
+  name: countly-server
+spec:
+  replicas: 1
+  serviceName: countly-server
+  selector:
+    matchLabels:
+      app: countly-server
+  template:
+    metadata:
+      labels:
+        app: countly-server
+    spec:
+      containers:
+      - image: countly/countly-server
+        imagePullPolicy: IfNotPresent
+        name: countly-server
+        resources: {}
+        # env:
+        # - name: COUNTLY_CONFIG_API_MONGODB_HOST
+        #   value: "mongodb"
+        # - name: COUNTLY_CONFIG_API_MONGODB_USERNAME
+        #   value: "admin"
+        # - name: COUNTLY_CONFIG_API_MONGODB_PASSWORD
+        #   value: "kjfedbkeFKJN"
+        # - name: COUNTLY_CONFIG_API_MONGODB_MAX_POOL_SIZE
+        #   value: "1000"
+        # - name: COUNTLY_CONFIG_FRONTEND_MONGODB_HOST
+        #   value: "mongodb"
+        # - name: COUNTLY_CONFIG_FRONTEND_MONGODB_USERNAME
+        #   value: "admin"
+        # - name: COUNTLY_CONFIG_FRONTEND_MONGODB_PASSWORD
+        #   value: "kjfedbkeFKJN"
+        #volumeMounts:
+        #- mountPath: /var/lib/mongodb
+        #  name: mongodb
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+
+  # volumeClaimTemplates:
+  # - metadata:
+  #     creationTimestamp: null
+  #     name: mongodb
+  #   spec:
+  #     accessModes:
+  #     - ReadWriteOnce
+  #     dataSource: null
+  #     resources:
+  #       requests:
+  #         storage: 5Gi
+  #     storageClassName: do-block-storage
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: countly-server
+  name: countly-server
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: countly-server
+  type: LoadBalancer
