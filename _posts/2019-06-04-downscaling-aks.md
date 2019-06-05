@@ -77,43 +77,47 @@ We also do this on a `Standard DS2 v2` node and get `--kube-reserved=cpu=69m,mem
 So we can see that the memory of `kube-reserved` grows almost linearly and seems to always be about 20-25% while CPU reservations are almost the same. The memory eviction buffer is always fixed at `750Mi` which would mean bigger resource waste as nodes decrease in size.
 
 #### CPU
-|               | Standard DS1 v2     | Standard DS2 v2   |
-| ------------- | ------------------: | ----------------: |
-| VM capacity   | 1000m               | 2000m             |
-| kube-reserved |  -60m               |  -69m             |
-| Allocatable   |  940m               | 1931m             |
-| Allocatable % |   94%               | 96.5%             |
+
+|               | Standard DS1 v2      | Standard DS2 v2    |
+| ------------- | -------------------: | -----------------: |
+| VM capacity   | 1.000m               | 2.000m             |
+| kube-reserved |   -60m               |   -69m             |
+| Allocatable   |   940m               | 1.931m             |
+| Allocatable % |    94%               |    96.5%           |
 
 #### Memory
-|               | Standard DS1 v2     | Standard DS2 v2   |
-| ------------- | ------------------: | ----------------: |
-| VM capacity   | 3500Mi              | 7113Mi            |
-| kube-reserved | -896Mi              | -1638m            |
-| Eviction buf  | -750Mi              | -750Mi            |
-| Allocatable   | 1814Mi              | 4667Mi            |
-| Allocatable % |   52%               |   65%             |
+
+|               | Standard DS1 v2      | Standard DS2 v2   |
+| ------------- | -------------------: | ----------------: |
+| VM capacity   | 3.500Mi              |  7.113Mi          |
+| kube-reserved |  -896Mi              | -1.638Mi          |
+| Eviction buf  |  -750Mi              |   -750Mi          |
+| Allocatable   | 1.814Mi              |  4.667Mi          |
+| Allocatable % |     52%              |    65%            |
 
 ## Node pods (DaemonSets)
 
 We have some Pods that run on every node, and they are installed by default by AKS. We get the resource limits of these by describing either the pods or the daemonsets.
 
-CPU:
+#### CPU
+
 |                                | Standard DS1 v2     | Standard DS2 v2   |
 | ------------------------------ | ------------------: | ----------------: |
-| Allocatable                    |  940m               |  1931m            |
-| kube-system/calico-node        | -250m               |  -250m            |
-| kube-system/kube-proxy         | -100m               |  -100m            |
-| kube-system/kube-svc-redirect  |   -5m               |    -5m            |
-| Available                      |  585m               |  1576m            |
+| Allocatable                    |  940m               |  1.931m           |
+| kube-system/calico-node        | -250m               |   -250m           |
+| kube-system/kube-proxy         | -100m               |   -100m           |
+| kube-system/kube-svc-redirect  |   -5m               |     -5m           |
+| Available                      |  585m               |  1.576m           |
 | Available %                    |   58%               |    81%            |
 
-Memory:
+#### Memory
+
 |                                | Standard DS1 v2     | Standard DS2 v2   |
 | ------------------------------ | ------------------: | ----------------: |
-| Allocatable                    | 1814Mi              | 4667Mi            |
-| kube-system/kube-svc-redirect  |  -32Mi              |  -32Mi            |
-| Available                      | 1782Mi              | 4635Mi            |
-| Available %                    |   50%               |   61%             |
+| Allocatable                    | 1.814Mi             | 4.667Mi           |
+| kube-system/kube-svc-redirect  |   -32Mi             |   -32Mi           |
+| Available                      | 1.782Mi             | 4.635Mi           |
+| Available %                    |    50%              |     61%           |
 
 So for `Standard DS1 v2` nodes we have about 0.5 CPU and 1.7GiB memory per node for pods. And for `Standard DS2 v2` nodes it's about 1.5 CPU and 4.6GiB memory.
 
@@ -134,38 +138,38 @@ Now lets add some standard Kubernetes pods we need to run. As far as I know thes
 
 | Deployment                        | CPU                 | Memory            | 
 | --------------------------------- | ------------------: | ----------------: |
-| grafana                           |  200m               |   500Mi           |
-| prometheus-operator               |  500m               |  1000Mi           |
-| prometheus-alertmanager           |  100m               |   225Mi           |
-| flux                              |   50m               |    64Mi           |
-| flux-helm-operator                |   50m               |    64Mi           |
-| Sum                               |  900m               |  1853Mi           |
+| grafana                           |  200m               |    500Mi          |
+| prometheus-operator               |  500m               |  1.000Mi          |
+| prometheus-alertmanager           |  100m               |    225Mi          |
+| flux                              |   50m               |     64Mi          |
+| flux-helm-operator                |   50m               |     64Mi          |
+| Sum                               |  900m               |  1.853Mi          |
 
 ## Radix platform pods
 
 | Deployment                        | CPU                 | Memory            | 
 | --------------------------------- | ------------------: | ----------------: |
-| radix-api-prod/server (x2)        | 200m                | 400Mi             |
-| radix-api-qa/server (x2)          | 100m                | 200Mi             |
-| radix-canary-golang-dev/www       |  40m                | 500Mi             |
-| radix-canary-golang-prod/www      |  40m                | 500Mi             |
-| radix-platform-prod/public-site   |   5m                |  10Mi             |
-| radix-web-console-prod/web        |  10m                |  42Mi             |
-| radix-web-console-qa/web          |   5m                |  21Mi             |
-| radix-github-webhook-prod/webhook |  10m                |  30Mi             |
-| radix-github-webhook-prod/webhook |   5m                |  15Mi             |
-| Sum                               | 415m                | 1718Mi            |
+| radix-api-prod/server (x2)        | 200m                |   400Mi           |
+| radix-api-qa/server (x2)          | 100m                |   200Mi           |
+| radix-canary-golang-dev/www       |  40m                |   500Mi           |
+| radix-canary-golang-prod/www      |  40m                |   500Mi           |
+| radix-platform-prod/public-site   |   5m                |    10Mi           |
+| radix-web-console-prod/web        |  10m                |    42Mi           |
+| radix-web-console-qa/web          |   5m                |    21Mi           |
+| radix-github-webhook-prod/webhook |  10m                |    30Mi           |
+| radix-github-webhook-prod/webhook |   5m                |    15Mi           |
+| Sum                               | 415m                | 1.718Mi           |
 
 If we add up the resource usage of these groups of workloads and see the total available resources on our 4 node Standard DS1 v2 clusters we are left with 0.56 CPU cores (14%) and 3GB of memory (22%):
 
-| Workload                | CPU    | Memory       |
-| ----------------------- | -----: | -----------: |
-| kube-system             |  460m  |  494Mi       |
-| third-party             |  900m  | 1853Mi       |
-| radix-platform          |  415m  | 1718Mi       |
-| Sum                     | 1760m  | 4020Mi       |
-| Available on 4x DS1     | 2340m  | 7128Mi       |
-| Available for workloads |  565m  | 3063Mi       |
+| Workload                | CPU     | Memory        |
+| ----------------------- | ------: | ------------: |
+| kube-system             |   460m  |   494Mi       |
+| third-party             |   900m  | 1.853Mi       |
+| radix-platform          |   415m  | 1.718Mi       |
+| Sum                     | 1.760m  | 4.020Mi       |
+| Available on 4x DS1     | 2.340m  | 7.128Mi       |
+| Available for workloads |   565m  | 3.063Mi       |
 
 Though surprising that we lost this much resources before being able to deploy our actual customer applications, it should still be a bit of headroom.
 
@@ -201,7 +205,7 @@ The request is originally set here https://github.com/Azure/aks-engine/blob/mast
 
 # Conclusion
 
-1) By increasing node size from `Standard DS1 v2` to `Standard DS2 v2` we also increase the available CPU from 58% per node to 81% per node. Available memory increases from 50% to 61% per node.
-2) With a total platform requirement of 3-4GB of memory and 4.6GB available on `Standard DS2 v2` we might have more resources for actual workloads on a 1-node `Standard DS2 v2` cluster than a 3-node `Standard DS1 v2` cluster!
-3) Beware of stranded resources limiting the utilization you can achieve across a cluster.
+* By increasing node size from `Standard DS1 v2` to `Standard DS2 v2` we also increase the available CPU from 58% per node to 81% per node. Available memory increases from 50% to 61% per node.
+* With a total platform requirement of 3-4GB of memory and 4.6GB available on `Standard DS2 v2` we might have more resources for actual workloads on a 1-node `Standard DS2 v2` cluster than a 3-node `Standard DS1 v2` cluster!
+* Beware of stranded resources limiting the utilization you can achieve across a cluster.
 
