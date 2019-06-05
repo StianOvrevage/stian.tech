@@ -71,6 +71,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: fathom
+  annotations:
+    certmanager.k8s.io/issuer: rancher
 spec:
   rules:
   - host: fathom.stian.tech
@@ -79,3 +81,7 @@ spec:
       - backend:
           serviceName: fathom-server
           servicePort: 80
+  tls:
+  - hosts:
+    - fathom.stian.tech
+    secretName: tls-fathom-ingress
