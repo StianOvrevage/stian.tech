@@ -60,7 +60,7 @@ So for this the loss is **69 millicores / 3.5%** of CPU and **2445MiB / 35%** of
 
 So CPU reservations are close to fixed regardless of node size while memory reservations are influenced by node size but luckily not linearly.
 
-What causes this "waste"? Reading up on https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/ gives a few clues. Kubelet will reserve CPU and memory resources for itself and other Kubernetes processes. It will also reserve a portion of memory to act as a buffer whenever a Pod is going beyond it's memory limits to avoid risking System OOM, potentially making the whole node unstable.
+What causes this "waste"? Reading up on [kubernetes.io](https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/) gives a few clues. Kubelet will reserve CPU and memory resources for itself and other Kubernetes processes. It will also reserve a portion of memory to act as a buffer whenever a Pod is going beyond it's memory limits to avoid risking System OOM, potentially making the whole node unstable.
 
 To figure out what these are configured to we log in to an actual AKS node's console and run `ps ax|grep kube` and the output looks like this:
 
@@ -177,7 +177,7 @@ Going further I checked the resource requests on 8 customer pods deployed in 4 e
 
 It turns out that we did an update to the LimitRange values a few days ago but that only applies to new Pods, so depending on if the Pods got re-created for any reason they may or may not have the old request of 500Mi, which in our case of small clusters will quickly drain the available resources.
 
-> Read more about LimitRange here: https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/ , and here is the commit that eventually trickled down to reduce memory usage: https://github.com/equinor/radix-operator/commit/f022fcde993efdf6cbcafb2c6632707a823a2a27
+> Read more about LimitRange here: [kubernetes.io](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/) , and here is the commit that eventually trickled down to reduce memory usage: [github.com](https://github.com/equinor/radix-operator/commit/f022fcde993efdf6cbcafb2c6632707a823a2a27)
 
 ## Pod scheduling
 
@@ -191,7 +191,7 @@ Imagine for example a cluster that is already utilized like this:
 | node1	 | 80% | 89%    |
 | node2	 | 98% | 60%    |
 
-Scheduling a workload that requests 15% CPU and 20% memory cannot be scheduled since there are no nodes fulfilling both requirements. In theory there is probably a CPU intensive Pod on node2 that could be moved to node1 but Kubernetes does not do re-scheduling to optimize utilization. It can do re-scheduling based on Pod priority ( https://medium.com/@dominik.tornow/the-kubernetes-scheduler-cd429abac02f ) and there is an incubator project ( https://akomljen.com/meet-a-kubernetes-descheduler/ ) that can try to drain nodes with low utilization.
+Scheduling a workload that requests 15% CPU and 20% memory cannot be scheduled since there are no nodes fulfilling both requirements. In theory there is probably a CPU intensive Pod on node2 that could be moved to node1 but Kubernetes does not do re-scheduling to optimize utilization. It can do re-scheduling based on Pod priority ([medium.com](https://medium.com/@dominik.tornow/the-kubernetes-scheduler-cd429abac02f)) and there is an incubator project ([akomljen.com](https://akomljen.com/meet-a-kubernetes-descheduler/)) that can try to drain nodes with low utilization.
 
 So for the foreseable future keeping in mind that resources can get stranded and that looking at the sum of cluster resources and sum of cluster resource demand might be misleading.
 
@@ -201,7 +201,7 @@ The biggest source of waste on our small clusters is `calico-node` which is inst
 
 ![calico-node cpu usage](/images/2019-06-04-downscaling-aks/calico-node-cpu.png "calico-node cpu usage")
 
-The request is originally set here https://github.com/Azure/aks-engine/blob/master/parts/k8s/containeraddons/kubernetesmasteraddons-calico-daemonset.yaml but I have not got into why that number was choosen. Next steps would be to do some benchmarking of `calico-node` to smoke out it's performance characteristics to see if it would be safe to lower the resource requests, but that is out of scope for now.
+The request is originally set here [github.com](https://github.com/Azure/aks-engine/blob/master/parts/k8s/containeraddons/kubernetesmasteraddons-calico-daemonset.yaml) but I have not got into why that number was choosen. Next steps would be to do some benchmarking of `calico-node` to smoke out it's performance characteristics to see if it would be safe to lower the resource requests, but that is out of scope for now.
 
 # Conclusion
 
