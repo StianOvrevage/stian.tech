@@ -199,7 +199,7 @@ So for the foreseable future keeping in mind that resources can get stranded and
 
 The biggest source of waste on our small clusters is `calico-node` which is installed on every node and requests 25% of a CPU core while only using 2.5-3% CPU:
 
-![calico-node cpu usage](/assets/2019-06-04-downscaling-aks/calico-node-cpu.png "calico-node cpu usage")
+![calico-node cpu usage](/images/2019-06-04-downscaling-aks/calico-node-cpu.png "calico-node cpu usage")
 
 The request is originally set here https://github.com/Azure/aks-engine/blob/master/parts/k8s/containeraddons/kubernetesmasteraddons-calico-daemonset.yaml but I have not got into why that number was choosen. Next steps would be to do some benchmarking of `calico-node` to smoke out it's performance characteristics to see if it would be safe to lower the resource requests, but that is out of scope for now.
 

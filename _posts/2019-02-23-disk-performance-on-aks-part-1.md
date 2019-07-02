@@ -166,13 +166,13 @@ A StorageClass in Kubernetes is a specification of a underlying disk that Pods c
 
 You can add it to your cluster with:
 
-    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/storageclass.yaml
+    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2019-02-23-disk-performance-on-aks-part-1/storageclass.yaml
 
 ---
 
 Next we create a StatefulSet that uses a `volumeClaimTemplate` to request a 250GB Azure disk. This provisions a P15 Azure Premium SSD with 125MB/s bandwidth and 1100 IOPS:
 
-    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/ubuntu-statefulset.yaml
+    kubectl apply -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2019-02-23-disk-performance-on-aks-part-1/ubuntu-statefulset.yaml
 
 Follow the progress of the Pod creation with `kubectl get pods -w` and wait until it is `Running`.
 
@@ -186,7 +186,7 @@ Once inside `bash` on the Pod, we install `fio`:
 
 And save the contents of in the Pod:
 
-    wget https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2019-02-23-disk-performance-on-aks-part-1/jobs.fio
+    wget https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2019-02-23-disk-performance-on-aks-part-1/jobs.fio
 
 Now we can run the different test sections one by one. **PS: If you don't specify a section `fio` will run all the tests _simultaneously_, which is not what we want.**
 
@@ -207,11 +207,11 @@ Now we can run the different test sections one by one. **PS: If you don't specif
 <a id="Test1"></a>
 ### Test 1 - Learning to dislike Azure Cache
 
-*Sequential write, 4K block size, Azure Cache enabled, OS cache disabled. See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
+*Sequential write, 4K block size, Azure Cache enabled, OS cache disabled. See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
 I run the first tests on the OS disk of a Kubernetes node. The OS disks have Azure caching enabled.
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test1.png "graph")
 
 The first 1-2 minutes of the test I get very good performance of 45MB/s and ~11.500 IOPS but that drops to 0 very quickly as the cache is full and busy writing things to the underlying disk. When that happens everything freezes and I cannot even execute shell commands. After stopping the test the system still hangs for a bit while the cache empties.
 
@@ -224,9 +224,9 @@ The maximum latency measured by `fio` was 108751k usec. Or about 108 seconds!
 <a id="Test2"></a>
 ### Test 2 - Disable Azure Cache - enable OS cache
 
-*Sequential write, 4K block size. __Change: Azure cache disabled, OS caching enabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
+*Sequential write, 4K block size. __Change: Azure cache disabled, OS caching enabled.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test2.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test2.png "graph")
 
 If we swap the Azure cache for the Linux OS cache we see that `iowait` increases while the writing occurs. The application sees high write performance until the number of `Dirty bytes` reaches a threshold of about 3.7GB of memory. The performance of the underlying disk is 125MB/s and 250 IOPS. Here we are throttled by the 125MB/s limit of the Azure P15 Premium SSD.
 
@@ -235,19 +235,19 @@ Also notice that on sequential writes of 4K with OS caching the actual blocks wr
 <a id="Test3"></a>
 ### Test 3 - Disable OS cache
 
-*Sequential write, 4K block size. __Change: OS caching disabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
+*Sequential write, 4K block size. __Change: OS caching disabled.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test3.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test3.png "graph")
 
 > By disabling the OS cache (`direct=1`) the results are consistent and predictable. There is no `iowait` since the application does not have multiple writes pending at the same time. Because of the 2-3ms latency of the disks we are not able to get more than about 400 IOPS. This gives us a meager 1.5MB/s even though the disk is limited to 1100 IOPS and 125MB/s. To reach that we need multiple simultaneous writes or a bigger IO depth (queue). `Disk active time` is also 0% which indicates that the disk is not saturated.
 
 <a id="Test4"></a>
 ### Test 4 - Increase IO depth
 
-*Sequential write, 4K block size, OS caching disabled. __Change: IO depth 16.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test4.md).*
+*Sequential write, 4K block size, OS caching disabled. __Change: IO depth 16.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test4.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test4.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test4.png "graph")
 
 > For this test we only increase the IO depth from 1 to 16. IO depth is the number of write operations `fio` will execute simultaneously. Since we are using `direct` these will be queued by the OS for writing. We are now able to hit the performance limit of 1100 IOPS. `Disk active time` is now steady at 100% indicating that we have saturated the disk.
 
@@ -255,9 +255,9 @@ Also notice that on sequential writes of 4K with OS caching the actual blocks wr
 <a id="Test5"></a>
 ### Test 5 - Larger block size, smaller IO depth
 
-*Sequential write, OS caching disabled. __Change: 128K block size, IO depth 1.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test5.md).*
+*Sequential write, OS caching disabled. __Change: 128K block size, IO depth 1.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test5.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test5.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test5.png "graph")
 
 > We increase the block size to 128KB and reduce the IO depth to 1 again. The write latency for larger blocks increase to ~5ms which gives us 200 IOPS and 28MB/s. The disk is not saturated.
 
@@ -265,9 +265,9 @@ Also notice that on sequential writes of 4K with OS caching the actual blocks wr
 <a id="Test6"></a>
 ### Test 6 - Enable OS cache
 
-*Sequential write, 256K block size, IO depth 1. __Change: OS caching enabled.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test6.md).*
+*Sequential write, 256K block size, IO depth 1. __Change: OS caching enabled.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test6.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test6.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test6.png "graph")
 
 > We have now enabled the OS cache/buffer (`direct=0`). We can see that the writes hitting the disk are now merged to 512KB blocks. We are hitting the 125MB/s limit with about 250 IOPS. Enabling the cache also has other effects: CPU suddenly shows significant IO wait. The write latency shoots through the roof. Also note that the writing continued for 30-40 seconds after the test was done. **This also means that the bandwidth and IOPS that `fio` sees and reports is higher than what is actually hitting the disk.**
 
@@ -275,9 +275,9 @@ Also notice that on sequential writes of 4K with OS caching the actual blocks wr
 <a id="Test7"></a>
 ### Test 7 - Random writes, small block size
 
-*IO depth 1, OS caching enabled. __Change: Random write, 4K block size.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
+*IO depth 1, OS caching enabled. __Change: Random write, 4K block size.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test1.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test7.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test7.png "graph")
 
 > Here we go from sequential writes to random writes. We are limited by IOPS. The average size of the blocks actually written to disks, and the IOPS required to hit the bandwidth limit is actually varying a bit throughout the test. The time taken to empty the cache is about as long as I ran the test (4-5 minutes).
 
@@ -285,9 +285,9 @@ Also notice that on sequential writes of 4K with OS caching the actual blocks wr
 <a id="Test8"></a>
 ### Test 8 - Large block size
 
-*Random write, OS caching enabled. __Change: 256K block size, IO depth 16.__ See [full fio test results](/assets/2019-02-23-disk-performance-on-aks-part-1/test8.md).*
+*Random write, OS caching enabled. __Change: 256K block size, IO depth 16.__ See [full fio test results](/images/2019-02-23-disk-performance-on-aks-part-1/test8.md).*
 
-![graph](/assets/2019-02-23-disk-performance-on-aks-part-1/test8.png "graph")
+![graph](/images/2019-02-23-disk-performance-on-aks-part-1/test8.png "graph")
 
 > Increasing the block size to 256K makes us bandwidth limited to 125MB/s.
 

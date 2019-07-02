@@ -308,7 +308,7 @@ spec:
 Last denne inn på clusteret med `kubectl create`:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2017-12-23-managed-kubernetes-on-azure/nginx-dep.yaml
+kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2017-12-23-managed-kubernetes-on-azure/nginx-dep.yaml
 ```
 
 Denne kommandoen oppretter ressursene beskrevet i filen. `kubectl` kan lese filer enten lokalt fra din maskin eller fra en URL.
@@ -364,7 +364,7 @@ spec:
 Vi ber Kubernetes om å opprette tjeneten vår med `kubectl create` som vanlig:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2017-12-23-managed-kubernetes-on-azure/nginx-svc.yaml
+kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2017-12-23-managed-kubernetes-on-azure/nginx-svc.yaml
 ```
 
 Deretter kan vi se hvilken IP-adresse tjenesten vår har fått av Azure:
@@ -507,5 +507,5 @@ Kubernetes har også et veldig aktivt Slack-miljø på [kubernetes.slack.com][30
 [32]: http://127.0.0.1:8001/ui/
 [33]: /2017/12/29/managed-kubernetes-on-azure-eng.html
 
-[minecraft]: /assets/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
-[k8s-dash]: /assets/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"
+[minecraft]: /images/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
+[k8s-dash]: /images/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"

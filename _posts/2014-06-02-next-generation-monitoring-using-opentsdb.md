@@ -405,7 +405,7 @@ Lastly we include a little performance comparison between the latest version of 
 
 The workload is gathering and storing metrics from 150 Cisco switches with 8200 ports/interfaces every 5 seconds. This equals about 15.000 points per second.
 
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure1.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure1.png"> </div>
 
 *Figure 1 - Data received by OpenTSDB per second*
 
@@ -420,11 +420,11 @@ Even though it is not the primary focus, we include some data about collection p
 
 Figure 2 shows that collection through SNMP polling consumes about 2200Mhz. We optimized some of the data types and definitions in collectd when moving to OpenTSDB and achieved a 20% performance increase in the polling as seen in Figure 3.
 
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure2.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure2.png"> </div>
 
 *Figure 2 - CPU Usage - SNMP polling and writing to RRDcached*
 
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure3.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure3.png"> </div>
 
 *Figure 3 - CPU Usage - SNMP polling and sending to OpenTSDB*
 
@@ -437,25 +437,25 @@ When considering storage performance we will look at CPU usage and disk IOPS sin
 #### collectd + rrdcached
 CPU usage - 1300Mhz, see Figure 2 above.
 <br />
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure4.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure4.png"> </div>
 
 *Figure 4 - Disk write IOPS - Fluctuating between 10 and 170 IOPS during the 1 hour flush period.*
 
 #### OpenTSDB + Hbase 0.96 + Hadoop 1
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure5.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure5.png"> </div>
 
 *Figure 5 - CPU usage - 1700Mhz baseline with peaks of 7000Mhz during [Java Garbage Collection (GC)][49] (untuned).*
 <br />
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure6.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure6.png"> </div>
 
 *Figure 6 - Disk write IOPS - 5 IOPS average with peaks of 25 IOPS during Java GC. We also see that disk read IOPS are much higher and this is due to regular compaction of the database and can be tuned. Reads in general can be reduced by increasing caching with more RAM if necessary.*
 
 #### OpenTSDB + HBase 0.98 + Hadoop 2
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure7.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure7.png"> </div>
 
 *Figure 7 - CPU usage - 1200Mhz baseline with peaks of 5000-6000Mhz during Java GC (untuned).*
 <br />
-<div style="text-align:center;"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure8.png"> </div>
+<div style="text-align:center;"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/Figure8.png"> </div>
 
 *Figure 8 - Disk write IOPS - &lt; 5 IOPS average with peaks of 25 IOPS during Java GC. Much less read IOPS during compaction compared to HBase 0.96.*
 
@@ -472,14 +472,14 @@ Even without tuning, a single instance OpenTSDB installation is able to handle s
 ----
 
 > **Stian Ovrevage**
-> <table style="border: 0"><tr><td width="100px"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/stianovrevage.jpg"> </td>
+> <table style="border: 0"><tr><td width="100px"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/stianovrevage.jpg"> </td>
 > <td>Stian is a senior consultant and founder at Peritus Consulting AS. He is currently managing the technical systems for a small FTTH ISP in Norway. He also does consulting for other clients when time permits. When not digging deep into technical challenges he enjoys the outdoors.<br><br>Also on [GitHub][59], [LinkedIn][58], [Facebook][56], [Google+][57] and [Twitter][55].</td></tr></table>
 > 
 
 ----
 
 > **Peritus Consulting Technical Reports**
-> <table style="border: 0"><tr><td width="100px"> <img src="/assets/2014-06-02-next-generation-monitoring-using-opentsdb-images/PeritusConsulting_small.png"> </td>
+> <table style="border: 0"><tr><td width="100px"> <img src="/images/2014-06-02-next-generation-monitoring-using-opentsdb-images/PeritusConsulting_small.png"> </td>
 > <td> Technical reports are in-depth articles aimed at giving actionable advice on new technologies as well as recommended best practices based on tried and true solutions. We cover areas that are lacking of good in depth coverage online but will not re-write topics that are already covered in a satisfactory way elsewhere.
 >
 > We also write tech notes which are shorter pieces with thoughts and tips on both technology and the way technology should be used optimally.

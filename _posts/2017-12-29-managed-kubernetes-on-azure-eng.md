@@ -305,7 +305,7 @@ spec:
 Load this into the cluster with `kubectl create`:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2017-12-23-managed-kubernetes-on-azure/nginx-dep.yaml
+kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2017-12-23-managed-kubernetes-on-azure/nginx-dep.yaml
 ```
 
 This command creates the resources described in the file. `kubectl` can read files either from your local disk or from a web URL.
@@ -361,7 +361,7 @@ spec:
 We tell Kubernetes to create our service with `kubectl create` as usual:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/assets/2017-12-23-managed-kubernetes-on-azure/nginx-svc.yaml
+kubectl create -f https://raw.githubusercontent.com/StianOvrevage/stian.tech/master/images/2017-12-23-managed-kubernetes-on-azure/nginx-svc.yaml
 ```
 
 We can then wait and see which IP-address Azure assigns our service:
@@ -500,5 +500,5 @@ Kubernetes also have a very active Slack-community on [kubernetes.slack.com][30]
 [32]: http://127.0.0.1:8001/ui/
 [33]: /2017/12/25/managed-kubernetes-on-azure.html
 
-[minecraft]: /assets/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
-[k8s-dash]: /assets/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"
+[minecraft]: /images/2017-12-23-managed-kubernetes-on-azure/minecraft-k8s.png "Kubernetes in MineCraft on Kubernetes"
+[k8s-dash]: /images/2017-12-23-managed-kubernetes-on-azure/k8s-dash.png "Kubernetes Dashboard"
