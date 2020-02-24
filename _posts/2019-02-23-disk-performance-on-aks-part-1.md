@@ -45,6 +45,13 @@ Table of contents
 
 > _I have no affiliation with Microsoft Azure except using them through work._
 
+## Corrections
+
+**February 2020**: Some of my previous knowledge and assumptions were not correct when applied to a cloud + Docker environment, as [explained by
+AKS PM Jesse Noller on GitHub](https://github.com/jnoller/kubernaughty/issues/46).
+
+One of the issues is that even accessing a "data disk" will incur IOPS on the OS disk, and throttling of the OS disk will also constraint IOPS on the data disks.
+
 <a id="Background"></a>
 ## Background
 
