@@ -179,7 +179,7 @@ When researching this post I've come across things that look promising but are h
 
 
 
-<a id="TheLandscape"></a>
+<a id="Landscape"></a>
 # The Landscape
 
 *How to use these maps:*
@@ -198,7 +198,7 @@ Version compatibility are in parenthesis. I have not mapped every version and ho
 
 **Self-hosted** - Implementations you can run on your own computer or server.
 
-<br><table style="text-align:center;"><tr><td colspan="2">**Legend**</td></tr><tr><td width="50px" ><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. **PS:** The absence of this icon does not automatically mean compatibility.</td></tr>
+<br><table style="text-align:center;"><tr><td width="50px" ><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. **PS:** The absence of this icon does not automatically mean compatibility.</td></tr>
 <tr><td><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-operator.png"></td><td>I put the lightning icon on the self-hosted implementations that have what seems to be stable Kubernetes operators available. In short, a Kubernetes operator makes running a stateful system, such as a database, on Kubernetes much easier. It might allow for longer time before migrating to a managed system.</td></tr>
 </table>
 
@@ -206,7 +206,7 @@ Version compatibility are in parenthesis. I have not mapped every version and ho
 <a id="SQLMap"></a>
 ## SQL
 
-<div style="text-align:center;"> <img src="../images/2020-11-27-end-of-2020-rough-database-landscape/map-sql.png"> </div>
+<div style="text-align:center;"> <img width="1405px" src="../images/2020-11-27-end-of-2020-rough-database-landscape/map-sql.png"> </div>
 
 <br>
 
