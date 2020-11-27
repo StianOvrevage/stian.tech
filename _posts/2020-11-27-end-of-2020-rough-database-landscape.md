@@ -52,7 +52,7 @@ TLDR: Scroll to the [diagrams](#Landscape) or view the [big picture](../images/2
 <a id="Background"></a>
 # Background
 
-I'm a consultant doing development, DevOps and cloud infrastructure. I also have the occational side project trying out the Tech Flavor of the Month.
+I'm a consultant doing development, DevOps and cloud infrastructure. I also have the occasional side project trying out the Tech Flavor of the Month.
 
 <a id="ProjectPhase"></a>
 ## Project phase overview
@@ -85,15 +85,15 @@ First I want the technology or software I choose to be instantly usable. A Docke
 
 At least for me it's a plus if it's easy to deploy on Kubernetes since I use it for everything already. I always have a cluster or three laying around so I can get a prototype or five up and running quickly before later spending money for cloud hosting.
 
-Does the thing have momentum and a community? If it does it probably has high quality tooling either by the vendor or the open source community (preferrably both). It probably also has lots of common questions answered on blogs and StackOverflow and Github issues.
+Does the thing have momentum and a community? If it does it probably has high quality tooling either by the vendor or the open source community (preferably both). It probably also has lots of common questions answered on blogs and StackOverflow and Github issues.
 
 **So we managed to build something and the audience likes it.**
 
-How easy is it to move it from a production environment into something stable and low-maintenance? For databases that would typically involve using a managed service for hosting it. You do not want to be responsible for operating your own databases. Is it common enough that there are competitors in the marketplace offering it as a managed service? If there is only a single option expect prices to be very steep. Preferrably also a managed service by one of the big known cloud platforms. They are usually cheaper. They are less likely to vanish. It might make integration with other systems easier later.
+How easy is it to move it from a production environment into something stable and low-maintenance? For databases that would typically involve using a managed service for hosting it. You do not want to be responsible for operating your own databases. Is it common enough that there are competitors in the marketplace offering it as a managed service? If there is only a single option expect prices to be very steep. Preferably also a managed service by one of the big known cloud platforms. They are usually cheaper. They are less likely to vanish. It might make integration with other systems easier later.
 
 **We hit some problems either because of raw scale or some type of usage we did not anticipate in the beginning.**
 
-Are there compatible implementations that might solve some common problems? Typically this is because an implementation has to make a descision about it's trade-offs. For a database system this is usually around the CAP theorem. A database system (or anything that keeps state) can be:
+Are there compatible implementations that might solve some common problems? Typically this is because an implementation has to make a decision about it's trade-offs. For a database system this is usually around the CAP theorem. A database system (or anything that keeps state) can be:
  - *Partition Tolerant* - The system still works if a node or the network between nodes fail.
  - *Available* - All requests receive a response.
  - *Consistent* - The data we read is the current data and not an earlier state.
@@ -125,7 +125,7 @@ The downside of this is that you have to start with a rough model of the data yo
 <a id="NoSQL"></a>
 ### NoSQL
 
-All the rage the last decade. You put data in you get data out. The data is structured but not necessarily pre-defined. Think JSON object with values, arrays and lists.
+All the rage the last decade. You put data in you get data out. The data is structured but not necessarily predefined. Think JSON object with values, arrays and lists.
 
 The benefit is productivity when developing. The drawback is that you may pay a price for those shortcuts later if you're not careful.
 
@@ -154,7 +154,7 @@ A time series is almost never changed after the fact. So these databases can be 
 <a id="Graph"></a>
 ### Graph
 
-Graph databases are cool. In a graph database the relationship between objects are a primary feature. Whereas in SQL you need to join an element from one table with another object in another table with some kind of common identifier.
+Graph databases are cool. In a graph database the relationship between objects is a primary feature. Whereas in SQL you need to join an element from one table with another object in another table with some kind of common identifier.
 
 For most simple use cases a regular SQL database will do fine. But when the number of objects stored (rows) and the number of intermediary tables (joins) become large it gets slow, or expensive, or both.
 
@@ -308,3 +308,4 @@ Congratulations if you made it this far!
 
 I did this research primarily to reduce my own analysis paralysis on various projects so I can get-back-to-building. If you learned something as well, great stuff!
 
+And if you want my advice, just use PostgreSQL unless you really know about some special requirements that necessitates using something else :-)
