@@ -200,11 +200,11 @@ Version compatibility are in parenthesis. I have not mapped every version and ho
 
 <div markdown="0">
 
-<br><table style="text-align:center;"><tr><td colspan="2"><strong>Legend<strong></td></tr><tr><td width="50px" style="vertical-align: middle;" ><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. <br><strong>PS:</strong> The absence of this icon does not automatically mean compatibility.</td></tr>
-<tr><td style="vertical-align: middle;"><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-operator.png"></td><td>I put the lightning icon on the self-hosted implementations that have what seems to be stable Kubernetes operators available. In short, a Kubernetes operator makes running a stateful system, such as a database, on Kubernetes much easier. It might allow for longer time before migrating to a managed system.</td></tr>
-</table>
-
-</div>
+<br>
+<table style="text-align:center;">
+<tr><td colspan="2"><strong>Legend<strong></td></tr>
+<tr><td width="50px" style="vertical-align: middle;" ><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. <br><strong>PS:</strong> The absence of this icon does not automatically mean compatibility.</td></tr>
+<tr><td style="vertical-align: middle;"><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-operator.png"></td><td>I put the lightning icon on the self-hosted implementations that have what seems to be stable Kubernetes operators available. In short, a Kubernetes operator makes running a stateful system, such as a database, on Kubernetes much easier. It might allow for longer time before migrating to a managed system.</td></tr></table></div>
 
 <a id="SQLMap"></a>
 ## SQL
