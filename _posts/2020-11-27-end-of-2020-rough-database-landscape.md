@@ -186,25 +186,25 @@ When researching this post I've come across things that look promising but are h
 
 Version compatibility are in parenthesis. I have not mapped every version and how much breaking they are compared to previous versions but included some notes where I know there might be issues.
 
-**API/Protocol/Interface** - This is decided by the framework, tool or driver you want to use. Sometimes it might be easier to choose the framework first and then a fitting database protocol. Or you might be lucky to choose the database features you need first and then select frameworks, tools and drivers that support it.
+*API/Protocol/Interface* - This is decided by the framework, tool or driver you want to use. Sometimes it might be easier to choose the framework first and then a fitting database protocol. Or you might be lucky to choose the database features you need first and then select frameworks, tools and drivers that support it.
 
 > I think interfaces are really important when creating and choosing technology. I had a [presentation](https://speakerdeck.com/stianovrevage/avoiding-lock-in-without-avoiding-managed-services) about it a while ago and I think it's still relevant.
 
-**Engine** - Database implementations that are independent but try to be compatible. If there are alternatives to the "original" implementation they might have done different tradeoffs with regards to the CAP theorem or solve other specific problems.
+*Engine* - Database implementations that are independent but try to be compatible. If there are alternatives to the "original" implementation they might have done different tradeoffs with regards to the CAP theorem or solve other specific problems.
 
-**Big three managed** - Available managed services by the big three clouds, Amazon (AWS), Google (GCP) or Microsoft (Azure). Having an option to host in the big three is most likely the cheapest method as well as having a variety of other managed services to build a complete system in a single cloud.
+*Big three managed* - Available managed services by the big three clouds, Amazon (AWS), Google (GCP) or Microsoft (Azure). Having an option to host in the big three is most likely the cheapest method as well as having a variety of other managed services to build a complete system in a single cloud.
 
-**Vendor managed** - If the database vendor or backing company offers an Official managed service. They are usually hosted on the big three. Potentially a large cost premium over the raw compute power.
+*Vendor managed* - If the database vendor or backing company offers an Official managed service. They are usually hosted on the big three. Potentially a large cost premium over the raw compute power.
 
-**Self-hosted** - Implementations you can run on your own computer or server.
+*Self-hosted* - Implementations you can run on your own computer or server.
 
 <div markdown="0">
 
 <br>
 <table style="text-align:center;">
-<tr><td colspan="2"><strong>Legend<strong></td></tr>
-<tr><td width="50px"><img style="vertical-align: middle;" src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. <br><strong>PS:</strong> The absence of this icon does not automatically mean compatibility.</td></tr>
-<tr><td><img style="vertical-align: middle;" src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-operator.png"></td><td>I put the lightning icon on the self-hosted implementations that have what seems to be stable Kubernetes operators available. In short, a Kubernetes operator makes running a stateful system, such as a database, on Kubernetes much easier. It might allow for longer time before migrating to a managed system.</td></tr></table></div>
+<tr><td colspan="2">Legend</td></tr>
+<tr><td width="50px"><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-checklist.png"></td><td>The checklist icon marks potential compatibility issues. For most use cases not a problem. But keep in mind. <br>PS: The absence of this icon does not automatically mean compatibility.</td></tr>
+<tr><td><img src="../images/2020-11-27-end-of-2020-rough-database-landscape/icon-operator.png"></td><td>I put the lightning icon on the self-hosted implementations that have what seems to be stable Kubernetes operators available. In short, a Kubernetes operator makes running a stateful system, such as a database, on Kubernetes much easier. It might allow for longer time before migrating to a managed system.</td></tr></table></div>
 
 <a id="SQLMap"></a>
 ## SQL
