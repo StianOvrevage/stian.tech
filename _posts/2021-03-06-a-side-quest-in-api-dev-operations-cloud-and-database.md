@@ -21,9 +21,16 @@ Here I will try to show and tell how I spent an evening digging around in a syst
 
   - [Background](#Background)
   - [The (initial) problem](#TheProblem)
-    - [Database categories](#DatabaseCategories)
-      - [SQL](#SQL)
-  - [Further reading](#FurtherReading)
+    - [Fixing the (initial) problem](#FurtherReading)
+    - [Verifying the (initial) fix](#FurtherReading)
+      - [Baseline simple request - HTTP1 1 connections, 20000 requests](#FurtherReading)
+      - [Baseline complex request - HTTP1 1 connections, 20000 requests](#FurtherReading)
+    - [Verifying the fix for assumed workload](#FurtherReading)
+      - [Complex request - HTTP1 6 connections, 500 requests](#FurtherReading)
+      - [Complex request - HTTP2 500 "connections", 500 requests](#FurtherReading)
+  - [Side quest: Database optimizations](#FurtherReading)
+  - [Determining the next bottleneck](#FurtherReading)
+  - [Side quest: Cluster resources and burstable VMs](#FurtherReading)
   - [Conclusion](#Conclusion)
 
 
@@ -56,7 +63,7 @@ In short, the current tech stack that has evolved over a couple of years is:
 I might write up a longer post about the details if anyone is interested.
 
 <a id="TheProblem"></a>
-## The (initial) problem
+# The (initial) problem
 
 A week ago I upgraded our API from version 1, that was deployed in January, to version 2 with new features and better architecture.
 
@@ -74,10 +81,12 @@ But what if we just want to show more, 50? 200? 500? The frontend already have t
 Analyzing the network waterfall in Chrome DevTools indicated that the requests now took 20-30 seconds to complete! But looking closer most of the time they were actually queued up in the browser. This is because
 Chrome only allows 6 concurrent TCP connection to the same origin when using HTTP1 (https://developers.google.com/web/tools/chrome-devtools/network/understanding-resource-timing).
 
+<a id="TheProblem"></a>
 ## Fixing the (initial) problem
 
 HTTP2 should fix this problem easily. By default HTTP2 is disabled in nginx-ingress. I add a couple of lines enabling it and update the Helm deployment of the ingress controller.
 
+<a id="TheProblem"></a>
 ## Verifying the (initial) fix
 
 Some common development tools doesn't support HTTP2, such as Postman. So I found `h2load` which can both help me verify HTTP2 is working and I also get to measure the improvement, nice!
@@ -86,6 +95,7 @@ Some common development tools doesn't support HTTP2, such as Postman. So I found
 
 > Also note that this is somewhat naive since it requests the same URL over and over which can give false results due to any caching. But fortunately we don't do any caching yet.
 
+<a id="TheProblem"></a>
 ### Baseline simple request - HTTP1 1 connections, 20000 requests
 
 Using 1 concurrent streams, 1 client and HTTP1 I get an estimate of performance pre-http2:
@@ -147,6 +157,7 @@ Which results in almost half the latency:
 
 So HTTP2 is working and providing significant latency improvements. Success!
 
+<a id="TheProblem"></a>
 ### Baseline complex request - HTTP1 1 connections, 20000 requests
 
 We start by establishing a baseline with 1 connection querying over and over.
@@ -189,12 +200,14 @@ _HTTP latency._
 
 _HTTP requests per second._
 
+<a id="TheProblem"></a>
 ## Verifying the fix for assumed workload
 
 So we verified that HTTP2 gives us a performance boost. But what happens when we fire away 500 requests to the much heavier `/analysis` endpoint?
 
 > These graphs are not as pretty since the ones above. This is mainly due to the sampling interval of the metrics and that we need several datapoints to accurately determine the rate() of a counter.
 
+<a id="TheProblem"></a>
 ### Complex request - HTTP1 6 connections, 500 requests
 
     finished in 32.25s, 14.88 req/s, 2.29MB/s
@@ -221,6 +234,7 @@ So we verified that HTTP2 gives us a performance boost. But what happens when we
 
 In summary it so far seems to scale linearly with load. Most of the time is spent fetching data from the database. Still very predictable low latency on database queries and the resulting HTTP response.
 
+<a id="TheProblem"></a>
 ### Complex request - HTTP2 500 "connections", 500 requests
 
 _So now we unleash the beast. Firing all 500 requests at the same time._
@@ -267,7 +281,8 @@ Looking at the graphs it seems we are starting to saturate the database. The lat
 
 So this optimization gives on average better performance, but more variability of the individual requests, when the system is under heavy load.
 
-## Side quest: Database optimizations
+<a id="TheProblem"></a>
+# Side quest: Database optimizations
 
 It seems we are saturating the database. Before throwing more money at the problem (by increasing database size) I like to know what the bottlenecks are. Looking at the traces from APM
 I see one query that is consistently taking 10x longer than the rest. I also confirm this in the AWS RDS Performance Insights that show the top SQL queries by load.
@@ -278,7 +293,8 @@ When it comes to performance that turns out to be an important implementation de
 
 For the forseable future this does not actually impact real world usage. It's only apparent under artificially large loads under the worst conditions. But now we know where we need to refactor things if performance actually becomes a problem.
 
-## Determining the next bottleneck
+<a id="TheProblem"></a>
+# Determining the next bottleneck
 
 Whenever I fix one problem I like to know where, how and when the next problem or limit is likely to appear. When increasing the number of requests and streams I expected to see increasing latency. But instead I see errors appear like a cliff:
 
@@ -289,7 +305,8 @@ Consulting the logs for both the nginx load balancer and the API there are no re
 
 I leave it at that. It's very unlikely we'll be hitting these limits any time soon.
 
-## Side quest: Cluster resources and burstable VMs
+<a id="TheProblem"></a>
+# Side quest: Cluster resources and burstable VMs
 
 When load testing the first time around sometimes Grafana would also become unresponsive. That's usually a bad sign. It might indicate that the underlying infrastructure is also reaching saturation. That is not good since it can impact what should be independent services.
 
@@ -309,6 +326,7 @@ I have not touched on the last point yet. I started adding [Pyroscope](https://p
 
 The outcome of this is that we need to separate burstable and stable load deployments. Monitoring and supporting systems are usually more stable resource wise while the actual business systems much more variable, and suitable for burst nodes. In practice we add a node pool of non-burst VMs and use NodeAffinity to stick Prometheus, Pyroscope etc to those nodes. Another benefit of this is that the supporting systems needed to troubleshoot problems are now less likely to be impacted by the problem itself, making troubleshooting much easier.
 
-## Conclusion
+<a id="Conclusion"></a>
+# Conclusion
 
 This whole adventure only took a few hours but resulted in some specific and immediate performance gains. It also highlighted the weakest links in our application, database and infrastructure architecture.
